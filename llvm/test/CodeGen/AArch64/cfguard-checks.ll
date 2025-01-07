@@ -62,12 +62,13 @@ entry:
   ; The call to __guard_check_icall_fptr should come immediately before the call to the target function.
   ; CHECK-LABEL: func_cf
   ; CHECK:        adrp x8, __guard_check_icall_fptr
-  ; CHECK-NEXT:   adrp x15, target_func
-  ; CHECK-NEXT:   add x15, x15, :lo12:target_func
-  ; CHECK-NEXT:   ldr x8, [x8, :lo12:__guard_check_icall_fptr]
-  ; CHECK-NEXT:   str x15, [sp, #8]
-  ; CHECK-NEXT:   blr x8
-  ; CHECK-NEXT:   blr x15
+	; CHECK:        adrp x0, target_func
+	; CHECK:        add x0, x0, :lo12:target_func
+	; CHECK:        ldr x8, [x8, :lo12:__guard_check_icall_fptr]
+	; CHECK:        adrp	x15, target_func
+	; CHECK:        add	x15, x15, :lo12:target_func
+	; CHECK: 	     	blr x8
+	; CHECK-NEXT:   blr x0
 }
 
 
@@ -91,13 +92,14 @@ lpad:                                             ; preds = %entry
   ; The call to __guard_check_icall_fptr should come immediately before the call to the target function.
   ; CHECK-LABEL: func_cf_invoke
   ; CHECK:        adrp x8, __guard_check_icall_fptr
-  ; CHECK-NEXT:   adrp x15, target_func
-  ; CHECK-NEXT:   add x15, x15, :lo12:target_func
-  ; CHECK-NEXT:   ldr x8, [x8, :lo12:__guard_check_icall_fptr]
-  ; CHECK-NEXT:   str x15, [sp, #8]
-  ; CHECK-NEXT:   blr x8
+	; CHECK:        adrp x0, target_func
+	; CHECK:        add x0, x0, :lo12:target_func
+	; CHECK:        ldr x8, [x8, :lo12:__guard_check_icall_fptr]
+	; CHECK:        adrp	x15, target_func
+	; CHECK:        add	x15, x15, :lo12:target_func
+	; CHECK:        blr x8
   ; CHECK-NEXT:   .Ltmp0:
-  ; CHECK-NEXT:   blr x15
+	; CHECK-NEXT:   blr x0
   ; CHECK:       // %common.ret
   ; CHECK:       // %lpad
 }
