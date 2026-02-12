@@ -486,7 +486,8 @@ namespace {
     SDValue visitCTTZ_ZERO_UNDEF(SDNode *N);
     SDValue visitCTPOP(SDNode *N);
     SDValue visitSELECT(SDNode *N);
-    // visit CTSELECT Node
+    // ISD::CTSELECT - Constant-Time SELECT (not related to CT in
+    // CTPOP/CTLZ/CTTZ where CT means "count").
     SDValue visitConstantTimeSelect(SDNode *N);
     SDValue visitVSELECT(SDNode *N);
     SDValue visitVP_SELECT(SDNode *N);
@@ -12474,7 +12475,7 @@ static SDValue foldBoolSelectToLogic(SDNode *N, const SDLoc &DL,
                                      SelectionDAG &DAG) {
   assert((N->getOpcode() == ISD::SELECT || N->getOpcode() == ISD::VSELECT ||
           N->getOpcode() == ISD::VP_SELECT) &&
-         "Expected a (v)(vp.)(ct) select");
+         "Expected a (v)(vp.)select");
   SDValue Cond = N->getOperand(0);
   SDValue T = N->getOperand(1), F = N->getOperand(2);
   EVT VT = N->getValueType(0);
