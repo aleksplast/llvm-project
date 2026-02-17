@@ -97,6 +97,16 @@ class AMDGPULowerVGPREncoding {
         V |= Op.MSBits.value_or(0) << (I * 2);
       return V;
     }
+
+    bool isCompatible(const ModeTy Other) const {
+      for (unsigned I : seq(OpNum)) {
+        if (!Ops[I].MSBits.has_value() || !Other.Ops[I].MSBits.has_value())
+          continue;
+        if (Ops[I].MSBits != Other.Ops[I].MSBits)
+          return false;
+      }
+      return true;
+    }
   };
 
 public:
@@ -276,6 +286,15 @@ bool AMDGPULowerVGPREncoding::runOnMachineInstr(MachineInstr &MI) {
   if (Ops.first) {
     ModeTy NewMode;
     computeMode(NewMode, MI, Ops.first, Ops.second);
+    if (!NewMode.isCompatible(CurrentMode) && MI.isCommutable() &&
+        TII->commuteInstruction(MI)) {
+      ModeTy NewModeCommuted;
+      computeMode(NewModeCommuted, MI, Ops.first, Ops.second);
+      if (NewModeCommuted.isCompatible(CurrentMode))
+        return false;
+      // Commute back.
+      TII->commuteInstruction(MI);
+    }
     return setMode(NewMode, MI.getIterator());
   }
   assert(!TII->hasVGPRUses(MI) || MI.isMetaInstruction() || MI.isPseudo());
