@@ -416,7 +416,8 @@ static void thinLTOResolvePrevailingGUID(
     // supported by the target. In this case, we can't change the linkage as
     // well in case the global is converted to declaration.
     else if (!isa<AliasSummary>(S.get()) &&
-             !GlobalInvolvedWithAlias.count(S.get()) && !ForceImportAll)
+             !GlobalInvolvedWithAlias.count(S.get()) && !ForceImportAll &&
+             !S->wasPromoted())
       S->setLinkage(GlobalValue::AvailableExternallyLinkage);
 
     // For ELF, set visibility to the computed visibility from summaries. We
@@ -485,7 +486,7 @@ static void thinLTOInternalizeAndPromoteGUID(
     // exported.
     if (isExported(S->modulePath(), VI)) {
       if (GlobalValue::isLocalLinkage(S->linkage()))
-        S->setLinkage(GlobalValue::ExternalLinkage);
+        S->promote();
       continue;
     }
 
