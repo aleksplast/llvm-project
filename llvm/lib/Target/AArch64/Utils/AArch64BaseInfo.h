@@ -857,26 +857,27 @@ struct TLBI : SysAliasOptionalReg {
 
 namespace AArch64TLBIP {
 struct TLBIP : SysAliasOptionalReg {
-  using SysAliasOptionalReg::SysAliasOptionalReg;
+  bool AllowTLBID = false;
 
-  bool allowTLBID() const {
-    return FeaturesRequired[llvm::AArch64::FeatureTLBID];
-  }
+  constexpr TLBIP(const char *N, uint16_t E, bool R, bool O, bool A,
+                  FeatureBitset F)
+      : SysAliasOptionalReg(N, E, R, O, F), AllowTLBID(A) {}
+  constexpr TLBIP(const char *N, uint16_t E, bool R, bool O, bool A)
+      : SysAliasOptionalReg(N, E, R, O), AllowTLBID(A) {}
+
+  bool allowTLBID() const { return AllowTLBID; }
 
   bool haveFeatures(FeatureBitset ActiveFeatures) const {
     if (ActiveFeatures[llvm::AArch64::FeatureAll])
       return true;
 
     FeatureBitset Required = FeaturesRequired;
-    if (allowTLBID()) {
-      Required.reset(llvm::AArch64::FeatureD128);
-      Required.reset(llvm::AArch64::FeatureTLBID);
-      return (Required & ActiveFeatures) == Required &&
-             (ActiveFeatures[llvm::AArch64::FeatureD128] ||
-              ActiveFeatures[llvm::AArch64::FeatureTLBID]);
-    }
-
-    return (Required & ActiveFeatures) == Required;
+    if ((Required & ActiveFeatures) != Required)
+      return false;
+    if (allowTLBID())
+      return ActiveFeatures[llvm::AArch64::FeatureD128] ||
+             ActiveFeatures[llvm::AArch64::FeatureTLBID];
+    return ActiveFeatures[llvm::AArch64::FeatureD128];
   }
 };
 #define GET_TLBIPTable_DECL
