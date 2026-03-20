@@ -4,6 +4,7 @@
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/MC/MCSubtargetInfo.h"
 
 using namespace llvm;
 
@@ -12,6 +13,9 @@ using namespace llvm;
 
 #define GET_REGINFO_MC_DESC
 #include "RISC_VI_VIIGenRegisterInfo.inc"
+
+#define GET_SUBTARGETINFO_MC_DESC
+#include "RISC_VI_VIIGenSubtargetInfo.inc"
 
 static MCRegisterInfo *createRISC_VI_VIIMCRegisterInfo(const Triple &TT) {
   RISC_VI_VII_DUMP_MAGENTA
@@ -27,6 +31,12 @@ static MCInstrInfo *createRISC_VI_VIIMCInstrInfo() {
   return X;
 }
 
+static MCSubtargetInfo *createRISC_VI_VIIMCSubtargetInfo(const Triple &TT,
+                                                 StringRef CPU, StringRef FS) {
+  RISC_VI_VII_DUMP_MAGENTA
+  return createRISC_VI_VIIMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
   RISC_VI_VII_DUMP_MAGENTA
   Target &TheRISC_VI_VIITarget = getTheRISC_VI_VIITarget();
@@ -34,4 +44,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
   TargetRegistry::RegisterMCRegInfo(TheRISC_VI_VIITarget, createRISC_VI_VIIMCRegisterInfo);
   // Register the MC instruction info.
   TargetRegistry::RegisterMCInstrInfo(TheRISC_VI_VIITarget, createRISC_VI_VIIMCInstrInfo);
+  // Register the MC subtarget info.
+  TargetRegistry::RegisterMCSubtargetInfo(TheRISC_VI_VIITarget,
+                                          createRISC_VI_VIIMCSubtargetInfo);
 }
