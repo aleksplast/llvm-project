@@ -1,5 +1,6 @@
 add_llvm_component_library(LLVMRISC_VI_VIIDesc
   RISC_VI_VIIMCTargetDesc.cpp
+  RISC_VI_VIIMCAsmInfo.cpp
 
   LINK_COMPONENTS
   MC

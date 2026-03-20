@@ -1,10 +1,13 @@
 #include "MCTargetDesc/RISC_VI_VIIInfo.h"
 #include "RISC_VI_VII.h"
+#include "RISC_VI_VIIMCAsmInfo.h"
 #include "TargetInfo/RISC_VI_VIITargetInfo.h"
+#include "llvm/MC/MCDwarf.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/Support/ErrorHandling.h"
 
 using namespace llvm;
 
@@ -37,9 +40,21 @@ static MCSubtargetInfo *createRISC_VI_VIIMCSubtargetInfo(const Triple &TT,
   return createRISC_VI_VIIMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
+static MCAsmInfo *createRISC_VI_VIIMCAsmInfo(const MCRegisterInfo &MRI,
+                                     const Triple &TT,
+                                     const MCTargetOptions &Options) {
+  RISC_VI_VII_DUMP_MAGENTA
+  MCAsmInfo *MAI = new RISC_VI_VIIELFMCAsmInfo(TT);
+  unsigned SP = MRI.getDwarfRegNum(RISC_VI_VII::SIX1, true);
+  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, SP, 0);
+  MAI->addInitialFrameState(Inst);
+  return MAI;
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
   RISC_VI_VII_DUMP_MAGENTA
   Target &TheRISC_VI_VIITarget = getTheRISC_VI_VIITarget();
+  RegisterMCAsmInfoFn X(TheRISC_VI_VIITarget, createRISC_VI_VIIMCAsmInfo);
   // Register the MC register info.
   TargetRegistry::RegisterMCRegInfo(TheRISC_VI_VIITarget, createRISC_VI_VIIMCRegisterInfo);
   // Register the MC instruction info.
