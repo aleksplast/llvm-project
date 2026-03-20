@@ -1,6 +1,7 @@
 #ifndef LLVM_LIB_TARGET_RISC_VI_VII_RISC_VI_VII_H
 #define LLVM_LIB_TARGET_RISC_VI_VII_RISC_VI_VII_H
 
+#include "MCTargetDesc/RISC_VI_VIIMCTargetDesc.h"
 #include "llvm/Support/raw_ostream.h"
 
 #define RISC_VI_VII_DUMP(Color)                                                        \
@@ -16,5 +17,6 @@
 #define RISC_VI_VII_DUMP_YELLOW RISC_VI_VII_DUMP(llvm::raw_ostream::YELLOW)
 #define RISC_VI_VII_DUMP_CYAN RISC_VI_VII_DUMP(llvm::raw_ostream::CYAN)
 #define RISC_VI_VII_DUMP_MAGENTA RISC_VI_VII_DUMP(llvm::raw_ostream::MAGENTA)
+#define RISC_VI_VII_DUMP_WHITE RISC_VI_VII_DUMP(llvm::raw_ostream::WHITE)
 
 #endif // LLVM_LIB_TARGET_RISC_VI_VII_RISC_VI_VII_H
