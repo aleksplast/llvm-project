@@ -1,6 +1,7 @@
 #include "RISC_VI_VIITargetMachine.h"
 #include "RISC_VI_VII.h"
 #include "TargetInfo/RISC_VI_VIITargetInfo.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/MC/TargetRegistry.h"
 #include <optional>
 
@@ -23,4 +24,26 @@ RISC_VI_VIITargetMachine::RISC_VI_VIITargetMachine(const Target &T, const Triple
           Reloc::Static, getEffectiveCodeModel(CM, CodeModel::Small), OL) {
   RISC_VI_VII_DUMP_CYAN
   initAsmInfo();
+}
+
+
+namespace {
+
+/// RISC_VI_VII Code Generator Pass Configuration Options.
+class RISC_VI_VIIPassConfig : public TargetPassConfig {
+public:
+  RISC_VI_VIIPassConfig(RISC_VI_VIITargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
+
+  bool addInstSelector() override {
+    RISC_VI_VII_DUMP_CYAN
+    return false;
+  }
+};
+
+} // end anonymous namespace
+
+TargetPassConfig *RISC_VI_VIITargetMachine::createPassConfig(PassManagerBase &PM) {
+  RISC_VI_VII_DUMP_CYAN
+  return new RISC_VI_VIIPassConfig(*this, PM);
 }
