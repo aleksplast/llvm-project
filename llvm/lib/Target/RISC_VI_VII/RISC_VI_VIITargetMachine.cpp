@@ -1,6 +1,7 @@
 #include "RISC_VI_VIITargetMachine.h"
 #include "RISC_VI_VII.h"
 #include "TargetInfo/RISC_VI_VIITargetInfo.h"
+#include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/MC/TargetRegistry.h"
 #include <optional>
@@ -19,9 +20,10 @@ RISC_VI_VIITargetMachine::RISC_VI_VIITargetMachine(const Target &T, const Triple
                                    std::optional<Reloc::Model> RM,
                                    std::optional<CodeModel::Model> CM,
                                    CodeGenOptLevel OL, bool JIT)
-    : CodeGenTargetMachineImpl(
-          T, "e-m:e-p:32:32-i8:8:32-i16:16:32-i64:64-n32", TT, CPU, FS, Options,
-          Reloc::Static, getEffectiveCodeModel(CM, CodeModel::Small), OL) {
+    : CodeGenTargetMachineImpl(T, "e-m:e-p:32:32-i8:8:32-i16:16:32-i64:64-n32",
+                               TT, CPU, FS, Options, Reloc::Static,
+                               getEffectiveCodeModel(CM, CodeModel::Small), OL),
+      TLOF(std::make_unique<TargetLoweringObjectFileELF>()) {
   RISC_VI_VII_DUMP_CYAN
   initAsmInfo();
 }
@@ -52,4 +54,9 @@ public:
 TargetPassConfig *RISC_VI_VIITargetMachine::createPassConfig(PassManagerBase &PM) {
   RISC_VI_VII_DUMP_CYAN
   return new RISC_VI_VIIPassConfig(*this, PM);
+}
+
+TargetLoweringObjectFile *RISC_VI_VIITargetMachine::getObjFileLowering() const {
+  RISC_VI_VII_DUMP_CYAN
+  return TLOF.get();
 }
