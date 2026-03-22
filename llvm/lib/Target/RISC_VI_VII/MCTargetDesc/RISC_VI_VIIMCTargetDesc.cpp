@@ -1,6 +1,7 @@
 #include "MCTargetDesc/RISC_VI_VIIInfo.h"
 #include "RISC_VI_VII.h"
 #include "RISC_VI_VIIMCAsmInfo.h"
+#include "RISC_VI_VIIInstPrinter.h"
 #include "TargetInfo/RISC_VI_VIITargetInfo.h"
 #include "llvm/MC/MCDwarf.h"
 #include "llvm/MC/MCInstrInfo.h"
@@ -51,6 +52,15 @@ static MCAsmInfo *createRISC_VI_VIIMCAsmInfo(const MCRegisterInfo &MRI,
   return MAI;
 }
 
+static MCInstPrinter *createRISC_VI_VIIMCInstPrinter(const Triple &T,
+                                             unsigned SyntaxVariant,
+                                             const MCAsmInfo &MAI,
+                                             const MCInstrInfo &MII,
+                                             const MCRegisterInfo &MRI) {
+  RISC_VI_VII_DUMP_MAGENTA
+  return new RISC_VI_VIIInstPrinter(MAI, MII, MRI);
+}
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
   RISC_VI_VII_DUMP_MAGENTA
   Target &TheRISC_VI_VIITarget = getTheRISC_VI_VIITarget();
@@ -62,4 +72,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
   // Register the MC subtarget info.
   TargetRegistry::RegisterMCSubtargetInfo(TheRISC_VI_VIITarget,
                                           createRISC_VI_VIIMCSubtargetInfo);
+  // Register the MCInstPrinter
+  TargetRegistry::RegisterMCInstPrinter(TheRISC_VI_VIITarget, createRISC_VI_VIIMCInstPrinter);
 }
