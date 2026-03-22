@@ -17,6 +17,7 @@ add_llvm_target(RISC_VI_VIICodeGen
   RISC_VI_VIISubtarget.cpp
   RISC_VI_VIIAsmPrinter.cpp
   RISC_VI_VIIISelDagToDag.cpp
+  RISC_VI_VIIISelLowering.cpp
 
   LINK_COMPONENTS
   CodeGen

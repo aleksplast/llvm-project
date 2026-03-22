@@ -22,6 +22,20 @@ enum NodeType : unsigned {
 
 } // namespace RISC_VI_VIIISD
 
+class RISC_VI_VIITargetLowering : public TargetLowering {
+public:
+  explicit RISC_VI_VIITargetLowering(const TargetMachine &TM, const RISC_VI_VIISubtarget &STI);
+
+  /// This method returns the name of a target specific DAG node.
+  const char *getTargetNodeName(unsigned Opcode) const override;
+
+  RISC_VI_VIISubtarget const &getSubtarget() const { return STI; }
+
+private:
+  const RISC_VI_VIISubtarget &STI;
+};
+
+
 } // end namespace llvm
 
 #endif // LLVM_LIB_TARGET_RISC_VI_VII_RISC_VI_VIIISELLOWERING_H

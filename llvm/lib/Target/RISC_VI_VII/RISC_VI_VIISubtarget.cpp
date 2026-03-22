@@ -10,8 +10,8 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_CTOR
 #include "RISC_VI_VIIGenSubtargetInfo.inc"
 
-RISC_VI_VIISubtarget::RISC_VI_VIISubtarget(const StringRef &CPU, const StringRef &TuneCPU,
-                           const StringRef &FS, const TargetMachine &TM)
-    : RISC_VI_VIIGenSubtargetInfo(TM.getTargetTriple(), CPU, TuneCPU, FS) {
+RISC_VI_VIISubtarget::RISC_VI_VIISubtarget(const Triple &TT, const std::string &CPU,
+                           const std::string &FS, const TargetMachine &TM)
+    : RISC_VI_VIIGenSubtargetInfo(TT, CPU, /*TuneCPU=*/CPU, FS), TLInfo(TM, *this) {
   RISC_VI_VII_DUMP_CYAN
 }
