@@ -35,8 +35,14 @@ public:
   RISC_VI_VIIPassConfig(RISC_VI_VIITargetMachine &TM, PassManagerBase &PM)
       : TargetPassConfig(TM, PM) {}
 
+  RISC_VI_VIITargetMachine &getRISC_VI_VIITargetMachine() const {
+    return getTM<RISC_VI_VIITargetMachine>();
+  }
+
+
   bool addInstSelector() override {
     RISC_VI_VII_DUMP_CYAN
+    addPass(createRISC_VI_VIIISelDag(getRISC_VI_VIITargetMachine(), getOptLevel()));
     return false;
   }
 };

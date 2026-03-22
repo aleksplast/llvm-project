@@ -6,6 +6,7 @@ tablegen(LLVM RISC_VI_VIIGenRegisterInfo.inc -gen-register-info)
 tablegen(LLVM RISC_VI_VIIGenInstrInfo.inc -gen-instr-info)
 tablegen(LLVM RISC_VI_VIIGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM RISC_VI_VIIGenMCPseudoLowering.inc -gen-pseudo-lowering)
+tablegen(LLVM RISC_VI_VIIGenDAGISel.inc -gen-dag-isel)
 
 add_public_tablegen_target(RISC_VI_VIICommonTableGen)
 
@@ -15,6 +16,7 @@ add_llvm_target(RISC_VI_VIICodeGen
   RISC_VI_VIIInstrInfo.cpp
   RISC_VI_VIISubtarget.cpp
   RISC_VI_VIIAsmPrinter.cpp
+  RISC_VI_VIIISelDagToDag.cpp
 
   LINK_COMPONENTS
   CodeGen
@@ -23,6 +25,7 @@ add_llvm_target(RISC_VI_VIICodeGen
   Target
   RISC_VI_VIIInfo
   AsmPrinter
+  SelectionDAG
 
   ADD_TO_COMPONENT
   RISC_VI_VII
