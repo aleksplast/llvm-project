@@ -5,6 +5,7 @@
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "RISC_VI_VIIFrameLowering.h"
 #include "RISC_VI_VIIISelLowering.h"
+#include "RISC_VI_VIIRegisterInfo.h"
 
 #define GET_SUBTARGETINFO_HEADER
 #include "RISC_VI_VIIGenSubtargetInfo.inc"
@@ -14,6 +15,7 @@ namespace llvm {
 class RISC_VI_VIISubtarget : public RISC_VI_VIIGenSubtargetInfo {
   RISC_VI_VIITargetLowering TLInfo;
   RISC_VI_VIIFrameLowering FrameLowering;
+  RISC_VI_VIIRegisterInfo RegInfo;
 public:
   RISC_VI_VIISubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
                         const TargetMachine &TM);
@@ -30,6 +32,11 @@ public:
   const RISC_VI_VIIFrameLowering *getFrameLowering() const override {
     RISC_VI_VII_DUMP_CYAN
     return &FrameLowering;
+  }
+
+  const RISC_VI_VIIRegisterInfo *getRegisterInfo() const override {
+    RISC_VI_VII_DUMP_CYAN
+    return &RegInfo;
   }
 };
 
