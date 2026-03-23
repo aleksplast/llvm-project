@@ -1,6 +1,7 @@
 include "llvm/Target/Target.td"
 include "RISC_VI_VIIRegisterInfo.td"
 include "RISC_VI_VIIInstrInfo.td"
+include "RISC_VI_VIICallingConv.td"
 
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;

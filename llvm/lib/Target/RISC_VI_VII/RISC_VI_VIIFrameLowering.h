@@ -5,11 +5,13 @@
 #include "llvm/CodeGen/TargetFrameLowering.h"
 
 namespace llvm {
+class RISC_VI_VIISubtarget;
 
 class RISC_VI_VIIFrameLowering : public TargetFrameLowering {
 public:
-  explicit RISC_VI_VIIFrameLowering()
-      : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(4), 0) {
+  RISC_VI_VIIFrameLowering(const RISC_VI_VIISubtarget &STI)
+      : TargetFrameLowering(TargetFrameLowering::StackGrowsDown, Align(4), 0),
+        STI(STI) {
     RISC_VI_VII_DUMP_GREEN
   }
 
@@ -24,6 +26,9 @@ public:
   /// frame pointer register. For most targets this is true only if the function
   /// has variable sized allocas or if frame pointer elimination is disabled.
   bool hasFPImpl(const MachineFunction &MF) const override { return false; }
+
+  private:
+  const RISC_VI_VIISubtarget &STI;
 };
 
 } // namespace llvm
