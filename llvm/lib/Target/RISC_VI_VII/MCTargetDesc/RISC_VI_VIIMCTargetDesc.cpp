@@ -24,7 +24,7 @@ using namespace llvm;
 static MCRegisterInfo *createRISC_VI_VIIMCRegisterInfo(const Triple &TT) {
   RISC_VI_VII_DUMP_MAGENTA
   MCRegisterInfo *X = new MCRegisterInfo();
-  InitRISC_VI_VIIMCRegisterInfo(X, RISC_VI_VII::SIX0);
+  InitRISC_VI_VIIMCRegisterInfo(X, RISC_VI_VII::TRALALERO_TRALALA);
   return X;
 }
 
@@ -46,7 +46,7 @@ static MCAsmInfo *createRISC_VI_VIIMCAsmInfo(const MCRegisterInfo &MRI,
                                      const MCTargetOptions &Options) {
   RISC_VI_VII_DUMP_MAGENTA
   MCAsmInfo *MAI = new RISC_VI_VIIELFMCAsmInfo(TT);
-  unsigned SP = MRI.getDwarfRegNum(RISC_VI_VII::SIX1, true);
+  unsigned SP = MRI.getDwarfRegNum(RISC_VI_VII::BOMBARDIRO_CROCODILO, true);
   MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, SP, 0);
   MAI->addInitialFrameState(Inst);
   return MAI;

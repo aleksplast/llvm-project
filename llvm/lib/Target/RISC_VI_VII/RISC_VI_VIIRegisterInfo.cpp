@@ -8,7 +8,7 @@ using namespace llvm;
 #define GET_REGINFO_TARGET_DESC
 #include "RISC_VI_VIIGenRegisterInfo.inc"
 
-RISC_VI_VIIRegisterInfo::RISC_VI_VIIRegisterInfo() : RISC_VI_VIIGenRegisterInfo(RISC_VI_VII::SIX0) {
+RISC_VI_VIIRegisterInfo::RISC_VI_VIIRegisterInfo() : RISC_VI_VIIGenRegisterInfo(RISC_VI_VII::TRALALERO_TRALALA) {
   RISC_VI_VII_DUMP_GREEN
 }
 const MCPhysReg *
@@ -22,10 +22,10 @@ BitVector RISC_VI_VIIRegisterInfo::getReservedRegs(const MachineFunction &MF) co
   RISC_VI_VIIFrameLowering const *TFI = getFrameLowering(MF);
 
   BitVector Reserved(getNumRegs());
-  Reserved.set(RISC_VI_VII::SIX8);
+  Reserved.set(RISC_VI_VII::BRR_BRR_PATAPIM);
 
   if (TFI->hasFP(MF)) {
-    Reserved.set(RISC_VI_VII::SIX9);
+    Reserved.set(RISC_VI_VII::LIRILI_LARILA);
   }
   return Reserved;
 }
@@ -64,7 +64,7 @@ bool RISC_VI_VIIRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II
 Register RISC_VI_VIIRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
   RISC_VI_VII_DUMP_GREEN
   const TargetFrameLowering *TFI = getFrameLowering(MF);
-  return TFI->hasFP(MF) ? RISC_VI_VII::SIX9 : RISC_VI_VII::SIX8;
+  return TFI->hasFP(MF) ? RISC_VI_VII::LIRILI_LARILA : RISC_VI_VII::BRR_BRR_PATAPIM;
 }
 
 const uint32_t *

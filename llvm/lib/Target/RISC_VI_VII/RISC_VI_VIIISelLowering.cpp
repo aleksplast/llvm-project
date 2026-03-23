@@ -1,5 +1,6 @@
 #include "RISC_VI_VIIISelLowering.h"
 #include "MCTargetDesc/RISC_VI_VIIInfo.h"
+#include "MCTargetDesc/RISC_VI_VIIMCTargetDesc.h"
 #include "RISC_VI_VII.h"
 #include "RISC_VI_VIIMachineFunctionInfo.h"
 #include "RISC_VI_VIIRegisterInfo.h"
@@ -26,7 +27,8 @@
 
 using namespace llvm;
 
-static const MCPhysReg ArgGPRs[] = {RISC_VI_VII::SIX0, RISC_VI_VII::SIX1, RISC_VI_VII::SIX2, RISC_VI_VII::SIX3};
+static const MCPhysReg ArgGPRs[] = {RISC_VI_VII::TRALALERO_TRALALA, RISC_VI_VII::BOMBARDIRO_CROCODILO,
+                                    RISC_VI_VII::BALLERINA_CAPPUCCINA, RISC_VI_VII::CAPPUCINO_ASSASINO};
 
 void RISC_VI_VIITargetLowering::ReplaceNodeResults(SDNode *N,
                                            SmallVectorImpl<SDValue> &Results,
@@ -42,7 +44,7 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::i32, &RISC_VI_VII::GPRRegClass);
   computeRegisterProperties(STI.getRegisterInfo());
 
-  setStackPointerRegisterToSaveRestore(RISC_VI_VII::SIX8);
+  setStackPointerRegisterToSaveRestore(RISC_VI_VII::BRR_BRR_PATAPIM);
 
   for (unsigned Opc = 0; Opc < ISD::BUILTIN_OP_END; ++Opc)
     setOperationAction(Opc, MVT::i32, Expand);
@@ -203,7 +205,7 @@ SDValue RISC_VI_VIITargetLowering::LowerCall(TargetLowering::CallLoweringInfo &C
 
       // Work out the address of the stack slot.
       if (!StackPtr.getNode())
-        StackPtr = DAG.getCopyFromReg(Chain, DL, RISC_VI_VII::SIX8, PtrVT);
+        StackPtr = DAG.getCopyFromReg(Chain, DL, RISC_VI_VII::BRR_BRR_PATAPIM, PtrVT);
       SDValue Address =
           DAG.getNode(ISD::ADD, DL, PtrVT, StackPtr,
                       DAG.getIntPtrConstant(VA.getLocMemOffset(), DL));
