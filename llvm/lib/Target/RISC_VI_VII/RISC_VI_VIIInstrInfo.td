@@ -50,6 +50,6 @@ def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
 
 // movli
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1 in
-def MOVLI : RISC_VI_VIIInst<0x0, (outs GPR:$rd), (ins simm16:$imm),
-                     "MOVli $rd $imm",
+def MOVI : RISC_VI_VIIInst<0x0, (outs GPR:$rd), (ins simm16:$imm),
+                     "MOVi $rd $imm",
                      [(set GPR:$rd, simm16:$imm)]>;
