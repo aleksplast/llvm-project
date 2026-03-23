@@ -23,6 +23,19 @@
 namespace llvm {
 class RISC_VI_VIITargetMachine;
 class FunctionPass;
+class RISC_VI_VIISubtarget;
+class AsmPrinter;
+class InstructionSelector;
+class MCInst;
+class MCOperand;
+class MachineInstr;
+class MachineOperand;
+class PassRegistry;
+
+bool lowerRISC_VI_VIIMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                  AsmPrinter &AP);
+bool LowerRISC_VI_VIIMachineOperandToMCOperand(const MachineOperand &MO,
+                                       MCOperand &MCOp, const AsmPrinter &AP);
 
 FunctionPass *createRISC_VI_VIIISelDag(RISC_VI_VIITargetMachine &TM, CodeGenOptLevel OptLevel);
 
