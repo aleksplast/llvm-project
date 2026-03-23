@@ -8,6 +8,7 @@ tablegen(LLVM RISC_VI_VIIGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM RISC_VI_VIIGenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM RISC_VI_VIIGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM RISC_VI_VIIGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM RISC_VI_VIIGenAsmWriter.inc -gen-asm-writer)
 
 add_public_tablegen_target(RISC_VI_VIICommonTableGen)
 

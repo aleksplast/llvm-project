@@ -3,8 +3,10 @@
 
 #include "RISC_VI_VII.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
+#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "RISC_VI_VIIFrameLowering.h"
 #include "RISC_VI_VIIISelLowering.h"
+#include "RISC_VI_VIIInstrInfo.h"
 #include "RISC_VI_VIIRegisterInfo.h"
 
 #define GET_SUBTARGETINFO_HEADER
@@ -16,6 +18,8 @@ class RISC_VI_VIISubtarget : public RISC_VI_VIIGenSubtargetInfo {
   RISC_VI_VIITargetLowering TLInfo;
   RISC_VI_VIIFrameLowering FrameLowering;
   RISC_VI_VIIRegisterInfo RegInfo;
+  RISC_VI_VIIInstrInfo InstrInfo;
+  SelectionDAGTargetInfo TSInfo;
 public:
   RISC_VI_VIISubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
                         const TargetMachine &TM);
@@ -37,6 +41,12 @@ public:
   const RISC_VI_VIIRegisterInfo *getRegisterInfo() const override {
     RISC_VI_VII_DUMP_CYAN
     return &RegInfo;
+  }
+
+  const RISC_VI_VIIInstrInfo *getInstrInfo() const override { return &InstrInfo; }
+  const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
+    RISC_VI_VII_DUMP_CYAN
+    return &TSInfo;
   }
 };
 

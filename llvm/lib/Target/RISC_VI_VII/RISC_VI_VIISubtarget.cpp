@@ -13,6 +13,6 @@ using namespace llvm;
 RISC_VI_VIISubtarget::RISC_VI_VIISubtarget(const Triple &TT, const std::string &CPU,
                            const std::string &FS, const TargetMachine &TM)
     : RISC_VI_VIIGenSubtargetInfo(TT, CPU, /*TuneCPU=*/CPU, FS), TLInfo(TM, *this),
-      FrameLowering(*this) {
+      FrameLowering(*this), InstrInfo() {
   RISC_VI_VII_DUMP_CYAN
 }
