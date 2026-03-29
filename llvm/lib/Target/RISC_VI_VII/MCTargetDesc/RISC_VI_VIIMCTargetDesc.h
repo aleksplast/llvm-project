@@ -15,8 +15,17 @@ namespace llvm {
 class MCCodeEmitter;
 class MCContext;
 class MCInstrInfo;
+class MCAsmBackend;
+class MCObjectTargetWriter;
+class MCRegisterInfo;
+class MCSubtargetInfo;
+class MCTargetOptions;
+class Target;
 
 MCCodeEmitter *createRISC_VI_VIIMCCodeEmitter(const MCInstrInfo &MCII, MCContext &Ctx);
+MCAsmBackend *createRISC_VI_VIIAsmBackend(const Target &T, const MCSubtargetInfo &STI,
+                                  const MCRegisterInfo &MRI,
+                                  const MCTargetOptions &Options);
 } // namespace llvm
 
 

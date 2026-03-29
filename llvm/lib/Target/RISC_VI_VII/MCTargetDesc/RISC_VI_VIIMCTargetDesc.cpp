@@ -74,7 +74,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISC_VI_VIITargetMC() {
                                           createRISC_VI_VIIMCSubtargetInfo);
   // Register the MCInstPrinter
   TargetRegistry::RegisterMCInstPrinter(TheRISC_VI_VIITarget, createRISC_VI_VIIMCInstPrinter);
-
   // Register the MC Code Emitter.
   TargetRegistry::RegisterMCCodeEmitter(TheRISC_VI_VIITarget, createRISC_VI_VIIMCCodeEmitter);
+  // Register the asm backend.
+  TargetRegistry::RegisterMCAsmBackend(TheRISC_VI_VIITarget, createRISC_VI_VIIAsmBackend);
 }
