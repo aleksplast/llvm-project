@@ -11,4 +11,13 @@
 #define GET_INSTRINFO_ENUM
 #include "RISC_VI_VIIGenInstrInfo.inc"
 
+namespace llvm {
+class MCCodeEmitter;
+class MCContext;
+class MCInstrInfo;
+
+MCCodeEmitter *createRISC_VI_VIIMCCodeEmitter(const MCInstrInfo &MCII, MCContext &Ctx);
+} // namespace llvm
+
+
 #endif // LLVM_LIB_TARGET_RISC_VI_VII_MCTARGETDESC_RISC_VI_VIIMCTARGETDESC_H
