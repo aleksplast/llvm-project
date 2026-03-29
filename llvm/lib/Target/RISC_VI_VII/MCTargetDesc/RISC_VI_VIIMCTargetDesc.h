@@ -1,6 +1,8 @@
 #ifndef LLVM_LIB_TARGET_RISC_VI_VII_MCTARGETDESC_RISC_VI_VIIMCTARGETDESC_H
 #define LLVM_LIB_TARGET_RISC_VI_VII_MCTARGETDESC_RISC_VI_VIIMCTARGETDESC_H
 
+#include <memory>
+
 // Defines symbolic names for RISC_VI_VII registers.  This defines a mapping from
 // register name to register number.
 //
@@ -26,6 +28,8 @@ MCCodeEmitter *createRISC_VI_VIIMCCodeEmitter(const MCInstrInfo &MCII, MCContext
 MCAsmBackend *createRISC_VI_VIIAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                   const MCRegisterInfo &MRI,
                                   const MCTargetOptions &Options);
+std::unique_ptr<MCObjectTargetWriter> createRISC_VI_VIIELFObjectWriter(bool Is64Bit,
+                                                               uint8_t OSABI);
 } // namespace llvm
 
 

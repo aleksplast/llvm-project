@@ -1266,6 +1266,7 @@ const EnumEntry<unsigned> ElfMachineType[] = {
   ENUM_ENT(EM_STM8,          "STMicroeletronics STM8 8-bit microcontroller"),
   ENUM_ENT(EM_TILE64,        "Tilera TILE64 multicore architecture family"),
   ENUM_ENT(EM_TILEPRO,       "Tilera TILEPro multicore architecture family"),
+  ENUM_ENT(EM_RISC_VI_VII,   "Brainrot RISC_VI_VII target for LLVM course"),
   ENUM_ENT(EM_MICROBLAZE,    "Xilinx MicroBlaze 32-bit RISC soft processor core"),
   ENUM_ENT(EM_CUDA,          "NVIDIA CUDA architecture"),
   ENUM_ENT(EM_TILEGX,        "Tilera TILE-Gx multicore architecture family"),

@@ -4,6 +4,7 @@ add_llvm_component_library(LLVMRISC_VI_VIIDesc
   RISC_VI_VIIInstPrinter.cpp
   RISC_VI_VIIMCCodeEmitter.cpp
   RISC_VI_VIIAsmBackend.cpp
+  RISC_VI_VIIELFObjectWriter.cpp
 
   LINK_COMPONENTS
   MC
