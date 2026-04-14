@@ -1,0 +1,5 @@
+BUILTIN(screenPutPixel, "vUiUiUi", "nc")
+BUILTIN(screenFlush, "v", "nc")
+BUILTIN(simRand, "Ui", "nc")
+
+#undef BUILTIN

@@ -402,12 +402,22 @@ namespace clang {
     };
   }
 
+  /// RISC_VI_VII builtins
+  namespace RISC_VI_VII {
+    enum {
+        LastTIBuiltin = clang::Builtin::FirstTSBuiltin-1,
+#define BUILTIN(ID, TYPE, ATTRS) BI##ID,
+#include "clang/Basic/BuiltinsRISC_VI_VII.def"
+        LastTSBuiltin
+    };
+  }
+
   static constexpr uint64_t LargestBuiltinID = std::max<uint64_t>(
       {ARM::LastTSBuiltin, AArch64::LastTSBuiltin, BPF::LastTSBuiltin,
        PPC::LastTSBuiltin, NVPTX::LastTSBuiltin, AMDGPU::LastTSBuiltin,
        X86::LastTSBuiltin, VE::LastTSBuiltin, RISCV::LastTSBuiltin,
        Hexagon::LastTSBuiltin, Mips::LastTSBuiltin, XCore::LastTSBuiltin,
-       SystemZ::LastTSBuiltin, WebAssembly::LastTSBuiltin});
+       SystemZ::LastTSBuiltin, WebAssembly::LastTSBuiltin, RISC_VI_VII::LastTSBuiltin});
 
 } // end namespace clang.
 
