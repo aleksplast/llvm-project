@@ -44,7 +44,7 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::i32, &RISC_VI_VII::GPRRegClass);
   computeRegisterProperties(STI.getRegisterInfo());
 
-  setStackPointerRegisterToSaveRestore(RISC_VI_VII::BRR_BRR_PATAPIM);
+  setStackPointerRegisterToSaveRestore(RISC_VI_VII::TUNG_TUNG_TUNG_SAHUR);
 
   for (unsigned Opc = 0; Opc < ISD::BUILTIN_OP_END; ++Opc)
     setOperationAction(Opc, MVT::i32, Expand);
@@ -205,7 +205,7 @@ SDValue RISC_VI_VIITargetLowering::LowerCall(TargetLowering::CallLoweringInfo &C
 
       // Work out the address of the stack slot.
       if (!StackPtr.getNode())
-        StackPtr = DAG.getCopyFromReg(Chain, DL, RISC_VI_VII::BRR_BRR_PATAPIM, PtrVT);
+        StackPtr = DAG.getCopyFromReg(Chain, DL, RISC_VI_VII::TUNG_TUNG_TUNG_SAHUR, PtrVT);
       SDValue Address =
           DAG.getNode(ISD::ADD, DL, PtrVT, StackPtr,
                       DAG.getIntPtrConstant(VA.getLocMemOffset(), DL));

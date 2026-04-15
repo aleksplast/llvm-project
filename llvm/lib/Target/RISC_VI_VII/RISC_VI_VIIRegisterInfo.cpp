@@ -22,7 +22,7 @@ BitVector RISC_VI_VIIRegisterInfo::getReservedRegs(const MachineFunction &MF) co
   RISC_VI_VIIFrameLowering const *TFI = getFrameLowering(MF);
 
   BitVector Reserved(getNumRegs());
-  Reserved.set(RISC_VI_VII::BRR_BRR_PATAPIM);
+  Reserved.set(RISC_VI_VII::TUNG_TUNG_TUNG_SAHUR);
 
   if (TFI->hasFP(MF)) {
     Reserved.set(RISC_VI_VII::LIRILI_LARILA);
@@ -64,7 +64,7 @@ bool RISC_VI_VIIRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II
 Register RISC_VI_VIIRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
   RISC_VI_VII_DUMP_GREEN
   const TargetFrameLowering *TFI = getFrameLowering(MF);
-  return TFI->hasFP(MF) ? RISC_VI_VII::LIRILI_LARILA : RISC_VI_VII::BRR_BRR_PATAPIM;
+  return TFI->hasFP(MF) ? RISC_VI_VII::LIRILI_LARILA : RISC_VI_VII::TUNG_TUNG_TUNG_SAHUR;
 }
 
 const uint32_t *

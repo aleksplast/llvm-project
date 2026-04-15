@@ -46,7 +46,7 @@ def BR : RISC_VI_VIIInst<0x52, (outs), (ins GPR:$r1), "BR $r1",
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
 def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
                 [(risc_vi_vii_ret)]>,
-                PseudoInstExpansion<(BR TUNG_TUNG_TUNG_SAHUR)>;
+                PseudoInstExpansion<(BR BRR_BRR_PATAPIM)>;
 
 // movli
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r2 = 0 in
