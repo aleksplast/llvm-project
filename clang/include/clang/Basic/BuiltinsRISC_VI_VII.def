@@ -1,5 +1,4 @@
-BUILTIN(screenPutPixel, "vUiUiUi", "nc")
-BUILTIN(screenFlush, "v", "nc")
-BUILTIN(simRand, "Ui", "nc")
+BUILTIN(screen_put_pixel, "vUiUiUi", "nc")
+BUILTIN(screen_flush, "v", "nc")
 
 #undef BUILTIN
