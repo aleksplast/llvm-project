@@ -19,6 +19,7 @@ enum NodeType : unsigned {
   CALL,
   BR_CC,
   INC_EQ,
+  MOVi,
 };
 
 } // namespace RISC_VI_VIIISD
@@ -66,8 +67,8 @@ private:
                       LLVMContext &Context, const Type *RetTy) const override;
 
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
-  SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
-  SDValue lowerSETCC(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
   unsigned getIsdOpIncCmp(ISD::CondCode CCVal) const;
 };
 

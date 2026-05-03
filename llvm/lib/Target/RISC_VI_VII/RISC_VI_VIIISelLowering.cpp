@@ -18,6 +18,7 @@
 #include "llvm/CodeGen/SelectionDAGNodes.h"
 #include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/CodeGen/ValueTypes.h"
+#include "llvm/CodeGenTypes/MachineValueType.h"
 #include "llvm/IR/CallingConv.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/Support/Debug.h"
@@ -96,13 +97,13 @@ SDValue RISC_VI_VIITargetLowering::LowerOperation(SDValue Op,
                                                    SelectionDAG &DAG) const {
   switch (Op->getOpcode()) {
   case ISD::BR_CC:
-    return lowerBR_CC(Op, DAG);
+    return LowerBR_CC(Op, DAG);
   default:
     llvm_unreachable("Unimplemented custom lowering");
   }
 }
 
-SDValue RISC_VI_VIITargetLowering::lowerBR_CC(SDValue Op,
+SDValue RISC_VI_VIITargetLowering::LowerBR_CC(SDValue Op,
                                                SelectionDAG &DAG) const {
   SDLoc DL(Op);
   SDValue Chain = Op.getOperand(0);
@@ -136,7 +137,6 @@ unsigned RISC_VI_VIITargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
     llvm_unreachable("Unhandled condition code for INC_CMP");
   }
 }
-
 
 //===----------------------------------------------------------------------===//
 //  Misc Lower Operation implementation

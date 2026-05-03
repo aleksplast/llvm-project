@@ -162,6 +162,16 @@ void RISC_VI_VIIDAGToDAGISel::Select(SDNode *Node) {
     CurDAG->RemoveDeadNode(Node);
     return;
   }
+
+  case ISD::GlobalAddress: {
+    GlobalAddressSDNode *GN = cast<GlobalAddressSDNode>(Node);
+    SDValue TGA = CurDAG->getTargetGlobalAddress(GN->getGlobal(), SDLoc(Node),
+                                                MVT::i32, GN->getOffset());
+    MachineSDNode *M = CurDAG->getMachineNode(RISC_VI_VII::MOVI, SDLoc(Node),
+                                              MVT::i32, TGA);
+    ReplaceNode(Node, M);
+    return;
+  }
   default:
     break;
   }

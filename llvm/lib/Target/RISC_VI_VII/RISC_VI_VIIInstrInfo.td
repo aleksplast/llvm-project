@@ -152,7 +152,6 @@ def LW : RISC_VI_VIIInst<0x10, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
     "LW $r1 $r2 $r3_imm",
     [(set GPR:$r1, (load (add GPR:$r2, simm32:$r3_imm)))]>;
 
-
 let mayStore = 1, hasSideEffects = 0 in
 def SW : RISC_VI_VIIInst<0x11, (outs), (ins GPR:$r1, GPR:$r2, simm32:$r3_imm),
     "SW $r1 $r2 $r3_imm",
