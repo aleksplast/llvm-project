@@ -27,6 +27,18 @@ void RISC_VI_VIIInstPrinter::printInst(const MCInst *MI, uint64_t Address,
   printAnnotation(O, Annot);
 }
 
+void RISC_VI_VIIInstPrinter::printBranchOperand(const MCInst *MI,
+                                                uint64_t Address, int OpNo,
+                                                raw_ostream &O) {
+  const MCOperand &MO = MI->getOperand(OpNo);
+  if (MO.isImm()) {
+    O << MO.getImm();
+    return;
+  }
+  assert(MO.isExpr() && "Unknown operand kind in printBranchOperand");
+  MO.getExpr()->print(O, &MAI);
+}
+
 void RISC_VI_VIIInstPrinter::printOperand(const MCInst *MI, int OpNo, raw_ostream &O) {
   const MCOperand &MO = MI->getOperand(OpNo);
 

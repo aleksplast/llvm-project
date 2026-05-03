@@ -5,6 +5,11 @@
 def risc_vi_vii_ret      : SDNode<"RISC_VI_VIIISD::RET", SDTNone,
                             [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
+def SDT_RISC_VI_VIIBrCC  : SDTypeProfile<0, 2, [SDTCisVT<0, i32>,
+                                                 SDTCisVT<1, OtherVT>]>;
+def risc_vi_vii_brcc     : SDNode<"RISC_VI_VIIISD::BR_CC", SDT_RISC_VI_VIIBrCC,
+                            [SDNPHasChain]>;
+
 //===----------------------------------------------------------------------===//
 // Instruction format superclass
 //===----------------------------------------------------------------------===//
@@ -19,6 +24,20 @@ class SImmAsmOperand<int width> : AsmOperandClass {
   let Name = "SImm" # width;
   let RenderMethod = "addImmOperands";
   let DiagnosticType = !strconcat("Invalid", Name);
+}
+
+def btarget16 : Operand<OtherVT> {
+  let ParserMatchClass = SImmAsmOperand<16>;
+  let PrintMethod = "printBranchOperand";
+  let EncoderMethod = "getBranchTarget16OpValue";
+  let DecoderMethod = "decodeSImmOperand<16>";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (MCOp.evaluateAsConstantImm(Imm))
+      return isInt<16>(Imm);
+    return MCOp.isBareSymbolRef();
+  }];
+  let OperandType = "OPERAND_PCREL";
 }
 
 def simm16 : Operand<i32>, ImmLeaf<i32, [{return isInt<16>(Imm);}]> {
@@ -39,6 +58,18 @@ def simm16 : Operand<i32>, ImmLeaf<i32, [{return isInt<16>(Imm);}]> {
 // RISC_VI_VII Instructions
 //===----------------------------------------------------------------------===//
 
+// Unconditional direct branch
+let isBarrier = 1, isBranch = 1, isTerminator = 1, r1 = 0, r2 = 0 in
+def B : RISC_VI_VIIInst<0xB0, (outs), (ins btarget16:$r3_imm), "B $r3_imm",
+                [(br bb:$r3_imm)]>;
+
+// Conditional branch: branch to target if $r1 != 0
+let isBranch = 1, isTerminator = 1, r2 = 0 in
+def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget16:$r3_imm),
+                      "BR_COND $r1 $r3_imm",
+                      [(risc_vi_vii_brcc GPR:$r1, bb:$r3_imm)]>;
+
+// Indirect branch (to register)
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCall = 1, isBranch = 1, isTerminator = 1, r2 = 0, r3_imm = 0 in
 def BR : RISC_VI_VIIInst<0x52, (outs), (ins GPR:$r1), "BR $r1",
                   [(brind GPR:$r1)]>;
@@ -61,3 +92,45 @@ def SCREEN_FLUSH : RISC_VI_VIIInst<0xFF, (outs), (ins), "SCREEN_FLUSH", [(int_ri
 // putpixel
 def SCREEN_PUT_PIXEL : RISC_VI_VIIInst<0xEE, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
                       "SCREEN_PUT_PIXEL $r1 $r2 $r3_imm", [(int_riscvivii_putpixel GPR:$r1, GPR:$r2, GPR:$r3_imm)]>;
+
+//===----------------------------------------------------------------------===//
+// Comparison instructions produce 0 or 1 in destination register
+//===----------------------------------------------------------------------===//
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
+
+// Signed comparisons (reg-reg)
+def CMP_EQ  : RISC_VI_VIIInst<0x30, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_EQ $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (seteq  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_NE  : RISC_VI_VIIInst<0x31, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_NE $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setne  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_LT  : RISC_VI_VIIInst<0x32, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_LT $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setlt  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_GT  : RISC_VI_VIIInst<0x33, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_GT $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setgt  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_LE  : RISC_VI_VIIInst<0x34, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_LE $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setle  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_GE  : RISC_VI_VIIInst<0x35, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_GE $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setge  GPR:$r2, GPR:$r3_imm))]>;
+
+// Unsigned comparisons (reg-reg)
+def CMP_ULT : RISC_VI_VIIInst<0x36, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_ULT $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setult GPR:$r2, GPR:$r3_imm))]>;
+def CMP_UGT : RISC_VI_VIIInst<0x37, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_UGT $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setugt GPR:$r2, GPR:$r3_imm))]>;
+def CMP_ULE : RISC_VI_VIIInst<0x38, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_ULE $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setule GPR:$r2, GPR:$r3_imm))]>;
+def CMP_UGE : RISC_VI_VIIInst<0x39, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+                "CMP_UGE $r1 $r2 $r3_imm",
+                [(set GPR:$r1, (setuge GPR:$r2, GPR:$r3_imm))]>;
+
+} // hasSideEffects = 0

@@ -58,6 +58,9 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::Constant, MVT::i32, Legal);
   setOperationAction(ISD::UNDEF, MVT::i32, Legal);
 
+  setOperationAction(ISD::SETCC, MVT::i32, Legal);
+
+  setOperationAction(ISD::BR, MVT::Other, Legal);
   setOperationAction(ISD::BR_CC, MVT::i32, Custom);
 
   setOperationAction(ISD::FRAMEADDR, MVT::i32, Legal);
@@ -70,8 +73,58 @@ const char *RISC_VI_VIITargetLowering::getTargetNodeName(unsigned Opcode) const 
     return "RISC_VI_VIIISD::CALL";
   case RISC_VI_VIIISD::RET:
     return "RISC_VI_VIIISD::RET";
+  case RISC_VI_VIIISD::BR_CC:
+    return "RISC_VI_VIIISD::BR_CC";
+  case RISC_VI_VIIISD::INC_EQi:
+    return "RISC_VI_VIIISD::INC_EQi";
+  case RISC_VI_VIIISD::INC_NEi:
+    return "RISC_VI_VIIISD::INC_NEi";
+  case RISC_VI_VIIISD::INC_LEi:
+    return "RISC_VI_VIIISD::INC_LEi";
+  case RISC_VI_VIIISD::INC_LTi:
+    return "RISC_VI_VIIISD::INC_LTi";
+  case RISC_VI_VIIISD::INC_GEi:
+    return "RISC_VI_VIIISD::INC_GEi";
+  case RISC_VI_VIIISD::INC_GTi:
+    return "RISC_VI_VIIISD::INC_GTi";
   }
   return nullptr;
+}
+
+SDValue RISC_VI_VIITargetLowering::LowerOperation(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  switch (Op->getOpcode()) {
+  case ISD::BR_CC:
+    return lowerBR_CC(Op, DAG);
+  default:
+    llvm_unreachable("Unimplemented custom lowering");
+  }
+}
+
+SDValue RISC_VI_VIITargetLowering::lowerBR_CC(SDValue Op,
+                                               SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  SDValue Chain = Op.getOperand(0);
+  ISD::CondCode CCVal = cast<CondCodeSDNode>(Op.getOperand(1))->get();
+  SDValue LHS  = Op.getOperand(2);
+  SDValue RHS  = Op.getOperand(3);
+  SDValue Dest = Op.getOperand(4);
+
+  SDValue Cond = DAG.getSetCC(DL, MVT::i32, LHS, RHS, CCVal);
+  return DAG.getNode(RISC_VI_VIIISD::BR_CC, DL, MVT::Other, Chain, Cond, Dest);
+}
+
+unsigned RISC_VI_VIITargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
+  switch (CCVal) {
+  case ISD::SETEQ: return RISC_VI_VIIISD::INC_EQi;
+  case ISD::SETNE: return RISC_VI_VIIISD::INC_NEi;
+  case ISD::SETLE: return RISC_VI_VIIISD::INC_LEi;
+  case ISD::SETLT: return RISC_VI_VIIISD::INC_LTi;
+  case ISD::SETGE: return RISC_VI_VIIISD::INC_GEi;
+  case ISD::SETGT: return RISC_VI_VIIISD::INC_GTi;
+  default:
+    llvm_unreachable("Unhandled condition code for INC_CMP");
+  }
 }
 
 

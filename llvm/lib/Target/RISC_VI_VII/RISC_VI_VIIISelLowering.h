@@ -18,6 +18,12 @@ enum NodeType : unsigned {
   RET,
   CALL,
   BR_CC,
+  INC_EQi,
+  INC_NEi,
+  INC_LEi,
+  INC_LTi,
+  INC_GEi,
+  INC_GTi,
 };
 
 } // namespace RISC_VI_VIIISD
@@ -63,6 +69,10 @@ private:
                       bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
                       LLVMContext &Context, const Type *RetTy) const override;
+
+  SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
+  SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
+  unsigned getIsdOpIncCmp(ISD::CondCode CCVal) const;
 };
 
 
