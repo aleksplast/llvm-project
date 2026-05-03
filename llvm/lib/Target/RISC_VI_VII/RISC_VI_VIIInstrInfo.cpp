@@ -15,3 +15,16 @@ using namespace llvm;
 #define DEBUG_TYPE "RISC_VI_VII-inst-info"
 
 RISC_VI_VIIInstrInfo::RISC_VI_VIIInstrInfo() : RISC_VI_VIIGenInstrInfo() { RISC_VI_VII_DUMP_GREEN }
+
+void RISC_VI_VIIInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                               MachineBasicBlock::iterator MBBI,
+                               const DebugLoc &DL, MCRegister DstReg,
+                               MCRegister SrcReg, bool KillSrc,
+                               bool RenamableDest, bool RenamableSrc) const {
+  if (RISC_VI_VII::GPRRegClass.contains(DstReg, SrcReg)) {
+    BuildMI(MBB, MBBI, DL, get(RISC_VI_VII::MOV), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc));
+    return;
+  }
+  llvm_unreachable("can't copyPhysReg");
+}

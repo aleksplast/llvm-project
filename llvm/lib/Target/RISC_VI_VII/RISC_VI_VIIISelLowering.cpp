@@ -50,6 +50,8 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
     setOperationAction(Opc, MVT::i32, Expand);
 
   setOperationAction(ISD::ADD, MVT::i32, Legal);
+  setOperationAction(ISD::AND, MVT::i32, Legal);
+  setOperationAction(ISD::SREM, MVT::i32, Legal);
   setOperationAction(ISD::MUL, MVT::i32, Legal);
   // ...
   setOperationAction(ISD::LOAD, MVT::i32, Legal);

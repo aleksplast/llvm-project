@@ -79,11 +79,35 @@ def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
                 [(risc_vi_vii_ret)]>,
                 PseudoInstExpansion<(BR BRR_BRR_PATAPIM)>;
 
-// movli
+// addi
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def ADDi : RISC_VI_VIIInst<0x40, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+           "ADDi $r1 $r2 $r3_imm",
+           [(set GPR:$r1, (add GPR:$r2, simm16:$r3_imm))]>;
+
+// sremi
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def SREMi : RISC_VI_VIIInst<0x50, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+           "SREMi $r1 $r2 $r3_imm",
+           [(set GPR:$r1, (srem GPR:$r2, simm16:$r3_imm))]>;
+
+// andi
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def ANDi : RISC_VI_VIIInst<0x60, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+           "ANDi $r1 $r2 $r3_imm",
+           [(set GPR:$r1, (and GPR:$r2, simm16:$r3_imm))]>;
+
+// movi
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r2 = 0 in
 def MOVI : RISC_VI_VIIInst<0x67, (outs GPR:$r1), (ins simm16:$r3_imm),
                      "MOVi $r1 $r3_imm",
                      [(set GPR:$r1, simm16:$r3_imm)]>;
+
+// mov
+let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r3_imm = 0 in
+def MOV : RISC_VI_VIIInst<0x66, (outs GPR:$r1), (ins GPR:$r2),
+          "MOV $r1 $r2",
+          []>;
 
 // flush
 let r1 = 0, r2 = 0, r3_imm = 0 in
