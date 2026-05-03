@@ -53,6 +53,7 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::AND, MVT::i32, Legal);
   setOperationAction(ISD::SREM, MVT::i32, Legal);
   setOperationAction(ISD::MUL, MVT::i32, Legal);
+  setOperationAction(ISD::SHL, MVT::i32, Legal);
   // ...
   setOperationAction(ISD::LOAD, MVT::i32, Legal);
   setOperationAction(ISD::STORE, MVT::i32, Legal);
@@ -77,18 +78,8 @@ const char *RISC_VI_VIITargetLowering::getTargetNodeName(unsigned Opcode) const 
     return "RISC_VI_VIIISD::RET";
   case RISC_VI_VIIISD::BR_CC:
     return "RISC_VI_VIIISD::BR_CC";
-  case RISC_VI_VIIISD::INC_EQi:
-    return "RISC_VI_VIIISD::INC_EQi";
-  case RISC_VI_VIIISD::INC_NEi:
-    return "RISC_VI_VIIISD::INC_NEi";
-  case RISC_VI_VIIISD::INC_LEi:
-    return "RISC_VI_VIIISD::INC_LEi";
-  case RISC_VI_VIIISD::INC_LTi:
-    return "RISC_VI_VIIISD::INC_LTi";
-  case RISC_VI_VIIISD::INC_GEi:
-    return "RISC_VI_VIIISD::INC_GEi";
-  case RISC_VI_VIIISD::INC_GTi:
-    return "RISC_VI_VIIISD::INC_GTi";
+  case RISC_VI_VIIISD::INC_EQ:
+    return "RISC_VI_VIIISD::INC_EQ";
   }
   return nullptr;
 }
@@ -108,9 +99,23 @@ SDValue RISC_VI_VIITargetLowering::lowerBR_CC(SDValue Op,
   SDLoc DL(Op);
   SDValue Chain = Op.getOperand(0);
   ISD::CondCode CCVal = cast<CondCodeSDNode>(Op.getOperand(1))->get();
-  SDValue LHS  = Op.getOperand(2);
   SDValue RHS  = Op.getOperand(3);
   SDValue Dest = Op.getOperand(4);
+  SDValue LHS = Op.getOperand(2);
+
+  if (CCVal == ISD::CondCode::SETEQ && LHS->getOpcode() == ISD::ADD) {
+    SDValue INC = LHS->getOperand(1);
+    if (INC->getOpcode() == ISD::Constant &&
+        cast<ConstantSDNode>(INC)->getZExtValue() == 1) {
+      SDValue INCEQ =
+          DAG.getNode(RISC_VI_VIIISD::INC_EQ, LHS, DAG.getVTList({MVT::i32, MVT::i32}),
+                      LHS->getOperand(0), RHS);
+      DAG.ReplaceAllUsesWith(LHS, INCEQ.getValue(1));
+      DAG.RemoveDeadNode(LHS.getNode());
+      return DAG.getNode(RISC_VI_VIIISD::BR_CC, DL, MVT::Other, Chain,
+                         INCEQ.getValue(0), Dest);
+    }
+  }
 
   SDValue Cond = DAG.getSetCC(DL, MVT::i32, LHS, RHS, CCVal);
   return DAG.getNode(RISC_VI_VIIISD::BR_CC, DL, MVT::Other, Chain, Cond, Dest);
@@ -118,12 +123,7 @@ SDValue RISC_VI_VIITargetLowering::lowerBR_CC(SDValue Op,
 
 unsigned RISC_VI_VIITargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
   switch (CCVal) {
-  case ISD::SETEQ: return RISC_VI_VIIISD::INC_EQi;
-  case ISD::SETNE: return RISC_VI_VIIISD::INC_NEi;
-  case ISD::SETLE: return RISC_VI_VIIISD::INC_LEi;
-  case ISD::SETLT: return RISC_VI_VIIISD::INC_LTi;
-  case ISD::SETGE: return RISC_VI_VIIISD::INC_GEi;
-  case ISD::SETGT: return RISC_VI_VIIISD::INC_GTi;
+  case ISD::SETEQ: return RISC_VI_VIIISD::INC_EQ;
   default:
     llvm_unreachable("Unhandled condition code for INC_CMP");
   }
@@ -647,7 +647,7 @@ bool RISC_VI_VIITargetLowering::isLegalAddressingMode(const DataLayout &DL,
   if (AM.BaseGV)
     return false;
 
-  if (!isInt<16>(AM.BaseOffs))
+  if (!isInt<32>(AM.BaseOffs))
     return false;
 
   switch (AM.Scale) {

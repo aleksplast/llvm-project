@@ -15,19 +15,17 @@ public:
     RISC_VI_VII_DUMP_GREEN
   }
 
-  /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
-  /// the function.
   void emitPrologue(MachineFunction &MF,
-                    MachineBasicBlock &MBB) const override {}
+                    MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF,
-                    MachineBasicBlock &MBB) const override {}
+                    MachineBasicBlock &MBB) const override;
 
-  /// hasFP - Return true if the specified function should have a dedicated
-  /// frame pointer register. For most targets this is true only if the function
-  /// has variable sized allocas or if frame pointer elimination is disabled.
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
+
   bool hasFPImpl(const MachineFunction &MF) const override { return false; }
 
-  private:
+private:
   const RISC_VI_VIISubtarget &STI;
 };
 

@@ -18,12 +18,7 @@ enum NodeType : unsigned {
   RET,
   CALL,
   BR_CC,
-  INC_EQi,
-  INC_NEi,
-  INC_LEi,
-  INC_LTi,
-  INC_GEi,
-  INC_GTi,
+  INC_EQ,
 };
 
 } // namespace RISC_VI_VIIISD

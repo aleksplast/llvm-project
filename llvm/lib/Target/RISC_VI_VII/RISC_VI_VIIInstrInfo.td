@@ -26,31 +26,31 @@ class SImmAsmOperand<int width> : AsmOperandClass {
   let DiagnosticType = !strconcat("Invalid", Name);
 }
 
-def btarget16 : Operand<OtherVT> {
-  let ParserMatchClass = SImmAsmOperand<16>;
+def btarget32 : Operand<OtherVT> {
+  let ParserMatchClass = SImmAsmOperand<32>;
   let PrintMethod = "printBranchOperand";
-  let EncoderMethod = "getBranchTarget16OpValue";
-  let DecoderMethod = "decodeSImmOperand<16>";
+  let EncoderMethod = "getBranchTarget32OpValue";
+  let DecoderMethod = "decodeSImmOperand<32>";
   let MCOperandPredicate = [{
     int64_t Imm;
     if (MCOp.evaluateAsConstantImm(Imm))
-      return isInt<16>(Imm);
+      return isInt<32>(Imm);
     return MCOp.isBareSymbolRef();
   }];
   let OperandType = "OPERAND_PCREL";
 }
 
-def simm16 : Operand<i32>, ImmLeaf<i32, [{return isInt<16>(Imm);}]> {
-  let ParserMatchClass = SImmAsmOperand<16>;
-  let EncoderMethod = "getSImm16OpValue";
-  let DecoderMethod = "decodeSImmOperand<16>";
+def simm32 : Operand<i32>, ImmLeaf<i32, [{ return true; }]> {
+  let ParserMatchClass = SImmAsmOperand<32>;
+  let EncoderMethod = "getSImm32OpValue";
+  let DecoderMethod = "decodeSImmOperand<32>";
   let MCOperandPredicate = [{
     int64_t Imm;
     if (MCOp.evaluateAsConstantImm(Imm))
-      return isInt<16>(Imm);
+      return isInt<32>(Imm);
     return MCOp.isBareSymbolRef();
   }];
-  let OperandType = "OPERAND_SIMM16";
+  let OperandType = "OPERAND_SIMM32";
   let OperandNamespace = "RISC_VI_VIIOp";
 }
 
@@ -60,12 +60,12 @@ def simm16 : Operand<i32>, ImmLeaf<i32, [{return isInt<16>(Imm);}]> {
 
 // Unconditional direct branch
 let isBarrier = 1, isBranch = 1, isTerminator = 1, r1 = 0, r2 = 0 in
-def B : RISC_VI_VIIInst<0xB0, (outs), (ins btarget16:$r3_imm), "B $r3_imm",
+def B : RISC_VI_VIIInst<0xB0, (outs), (ins btarget32:$r3_imm), "B $r3_imm",
                 [(br bb:$r3_imm)]>;
 
 // Conditional branch: branch to target if $r1 != 0
 let isBranch = 1, isTerminator = 1, r2 = 0 in
-def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget16:$r3_imm),
+def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget32:$r3_imm),
                       "BR_COND $r1 $r3_imm",
                       [(risc_vi_vii_brcc GPR:$r1, bb:$r3_imm)]>;
 
@@ -81,33 +81,64 @@ def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
 
 // addi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def ADDi : RISC_VI_VIIInst<0x40, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+def ADDi : RISC_VI_VIIInst<0x40, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
            "ADDi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (add GPR:$r2, simm16:$r3_imm))]>;
+           [(set GPR:$r1, (add GPR:$r2, simm32:$r3_imm))]>;
 
 // sremi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def SREMi : RISC_VI_VIIInst<0x50, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+def SREMi : RISC_VI_VIIInst<0x50, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
            "SREMi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (srem GPR:$r2, simm16:$r3_imm))]>;
+           [(set GPR:$r1, (srem GPR:$r2, simm32:$r3_imm))]>;
 
 // andi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def ANDi : RISC_VI_VIIInst<0x60, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
+def ANDi : RISC_VI_VIIInst<0x60, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
            "ANDi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (and GPR:$r2, simm16:$r3_imm))]>;
+           [(set GPR:$r1, (and GPR:$r2, simm32:$r3_imm))]>;
 
 // movi
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r2 = 0 in
-def MOVI : RISC_VI_VIIInst<0x67, (outs GPR:$r1), (ins simm16:$r3_imm),
+def MOVI : RISC_VI_VIIInst<0x67, (outs GPR:$r1), (ins simm32:$r3_imm),
                      "MOVi $r1 $r3_imm",
-                     [(set GPR:$r1, simm16:$r3_imm)]>;
+                     [(set GPR:$r1, simm32:$r3_imm)]>;
 
 // mov
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r3_imm = 0 in
 def MOV : RISC_VI_VIIInst<0x66, (outs GPR:$r1), (ins GPR:$r2),
           "MOV $r1 $r2",
           []>;
+
+let Constraints = "$r2 = $rs_out", hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
+def INC_EQ : RISC_VI_VIIInst<0x90, (outs GPR:$r1, GPR:$rs_out), (ins GPR:$r2, simm32:$r3_imm), "INC_EQ $r1 $r2 $r3_imm", []>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def ADD : RISC_VI_VIIInst<0x41, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+    "ADD $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (add GPR:$r2, GPR:$r3_imm))]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def MUL : RISC_VI_VIIInst<0x42, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+    "MUL $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (mul GPR:$r2, GPR:$r3_imm))]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def SHL : RISC_VI_VIIInst<0x43, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+    "SHL $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (shl GPR:$r2, GPR:$r3_imm))]>;
+
+let mayLoad = 1, hasSideEffects = 0 in
+def LW : RISC_VI_VIIInst<0x10, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
+    "LW $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (load (add GPR:$r2, simm32:$r3_imm)))]>;
+
+let mayStore = 1, hasSideEffects = 0 in
+def SW : RISC_VI_VIIInst<0x11, (outs), (ins GPR:$r1, GPR:$r2, simm32:$r3_imm),
+    "SW $r1 $r2 $r3_imm",
+    [(store (i32 GPR:$r1), (add GPR:$r2, simm32:$r3_imm))]>;
+
+def : Pat<(i32 (load GPR:$r2)), (LW GPR:$r2, 0)>;
+def : Pat<(store (i32 GPR:$r1), GPR:$r2), (SW GPR:$r1, GPR:$r2, 0)>;
 
 // flush
 let r1 = 0, r2 = 0, r3_imm = 0 in
