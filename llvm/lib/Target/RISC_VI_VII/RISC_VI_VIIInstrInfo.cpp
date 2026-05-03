@@ -14,7 +14,9 @@ using namespace llvm;
 
 #define DEBUG_TYPE "RISC_VI_VII-inst-info"
 
-RISC_VI_VIIInstrInfo::RISC_VI_VIIInstrInfo() : RISC_VI_VIIGenInstrInfo() { RISC_VI_VII_DUMP_GREEN }
+RISC_VI_VIIInstrInfo::RISC_VI_VIIInstrInfo()
+    : RISC_VI_VIIGenInstrInfo(RISC_VI_VII::ADJCALLSTACKDOWN,
+                              RISC_VI_VII::ADJCALLSTACKUP) { RISC_VI_VII_DUMP_GREEN }
 
 void RISC_VI_VIIInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                MachineBasicBlock::iterator MBBI,

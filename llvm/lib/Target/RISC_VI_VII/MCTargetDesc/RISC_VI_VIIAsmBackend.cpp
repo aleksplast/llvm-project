@@ -23,6 +23,12 @@ public:
 
   unsigned getNumFixupKinds() const override { return 0; }
 
+  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override {
+    if (Kind >= FirstLiteralRelocationKind)
+      return MCAsmBackend::getFixupKindInfo(FK_NONE);
+    return MCAsmBackend::getFixupKindInfo(Kind);
+  }
+
   bool writeNopData(raw_ostream &OS, uint64_t Count,
                     const MCSubtargetInfo *STI) const override {
     // Cannot emit NOP with size not multiple of 32 bits.
@@ -48,7 +54,13 @@ public:
                   const MCValue &Target, MutableArrayRef<char> Data,
                   uint64_t Value, bool IsResolved,
                   const MCSubtargetInfo *STI) const override {
-    return;
+    if (!IsResolved)
+      return;
+    unsigned Offset = Fixup.getOffset();
+    Data[Offset + 0] = (Value >> 0) & 0xFF;
+    Data[Offset + 1] = (Value >> 8) & 0xFF;
+    Data[Offset + 2] = (Value >> 16) & 0xFF;
+    Data[Offset + 3] = (Value >> 24) & 0xFF;
   }
 
   std::unique_ptr<MCObjectTargetWriter>
