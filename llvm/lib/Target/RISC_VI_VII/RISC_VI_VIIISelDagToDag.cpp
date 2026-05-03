@@ -121,7 +121,6 @@ void RISC_VI_VIIDAGToDAGISel::Select(SDNode *Node) {
     return;
   }
 
-  // Fold store(val, frameindex) and store(val, add(frameindex, imm16)) into SW.
   case ISD::STORE: {
     auto *ST = cast<StoreSDNode>(Node);
     if (ST->isTruncatingStore())

@@ -127,10 +127,31 @@ def SHL : RISC_VI_VIIInst<0x43, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
     "SHL $r1 $r2 $r3_imm",
     [(set GPR:$r1, (shl GPR:$r2, GPR:$r3_imm))]>;
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def OR : RISC_VI_VIIInst<0x44, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+    "OR $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (or GPR:$r2, GPR:$r3_imm))]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def AND : RISC_VI_VIIInst<0x45, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
+    "AND $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (and GPR:$r2, GPR:$r3_imm))]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def XORi : RISC_VI_VIIInst<0x46, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
+    "XORi $r1 $r2 $r3_imm",
+    [(set GPR:$r1, (xor GPR:$r2, simm32:$r3_imm))]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+def SELECT : RISC_VI_VIIInst<0x47, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm1, simm32:$imm2, simm32:$imm3),
+    "SELECT $r1 $r2 $imm1 $imm2 $imm3",
+    [(set GPR:$r1, (selectcc GPR:$r2, simm32:$imm1, simm32:$imm2, simm32:$imm3, SETEQ))]>;
+
 let mayLoad = 1, hasSideEffects = 0 in
 def LW : RISC_VI_VIIInst<0x10, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
     "LW $r1 $r2 $r3_imm",
     [(set GPR:$r1, (load (add GPR:$r2, simm32:$r3_imm)))]>;
+
 
 let mayStore = 1, hasSideEffects = 0 in
 def SW : RISC_VI_VIIInst<0x11, (outs), (ins GPR:$r1, GPR:$r2, simm32:$r3_imm),

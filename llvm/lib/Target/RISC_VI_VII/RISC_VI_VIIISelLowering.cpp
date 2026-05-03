@@ -16,6 +16,7 @@
 #include "llvm/CodeGen/MachineRegisterInfo.h"
 #include "llvm/CodeGen/Register.h"
 #include "llvm/CodeGen/SelectionDAGNodes.h"
+#include "llvm/CodeGen/TargetLowering.h"
 #include "llvm/CodeGen/ValueTypes.h"
 #include "llvm/IR/CallingConv.h"
 #include "llvm/IR/Intrinsics.h"
@@ -33,7 +34,7 @@ static const MCPhysReg ArgGPRs[] = {RISC_VI_VII::TRALALERO_TRALALA, RISC_VI_VII:
 void RISC_VI_VIITargetLowering::ReplaceNodeResults(SDNode *N,
                                            SmallVectorImpl<SDValue> &Results,
                                            SelectionDAG &DAG) const {
-  llvm_unreachable("");
+  // Let the default type-legalizer handle expansion (e.g. i64 → i32 pairs).
 }
 
 
@@ -51,10 +52,11 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::ADD, MVT::i32, Legal);
   setOperationAction(ISD::AND, MVT::i32, Legal);
+  setOperationAction(ISD::OR,  MVT::i32, Legal);
   setOperationAction(ISD::SREM, MVT::i32, Legal);
   setOperationAction(ISD::MUL, MVT::i32, Legal);
   setOperationAction(ISD::SHL, MVT::i32, Legal);
-  // ...
+  setOperationAction(ISD::XOR, MVT::i32, Legal);
   setOperationAction(ISD::LOAD, MVT::i32, Legal);
   setOperationAction(ISD::STORE, MVT::i32, Legal);
 
@@ -62,6 +64,12 @@ RISC_VI_VIITargetLowering::RISC_VI_VIITargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::UNDEF, MVT::i32, Legal);
 
   setOperationAction(ISD::SETCC, MVT::i32, Legal);
+
+  setOperationAction(ISD::SELECT, MVT::i1, Expand);
+  setOperationAction(ISD::SELECT_CC, MVT::i1, Legal);
+
+  setOperationAction(ISD::SELECT, MVT::i32, Expand);
+  setOperationAction(ISD::SELECT_CC, MVT::i32, Legal);
 
   setOperationAction(ISD::BR, MVT::Other, Legal);
   setOperationAction(ISD::BR_CC, MVT::i32, Custom);

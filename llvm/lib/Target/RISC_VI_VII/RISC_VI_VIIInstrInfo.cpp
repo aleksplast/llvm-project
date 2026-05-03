@@ -28,3 +28,30 @@ void RISC_VI_VIIInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   }
   llvm_unreachable("can't copyPhysReg");
 }
+
+#include "RISC_VI_VIIInstrInfo.h"
+#include "RISC_VI_VIIRegisterInfo.h"
+
+void RISC_VI_VIIInstrInfo::storeRegToStackSlot(
+      MachineBasicBlock &MBB, MachineBasicBlock::iterator MI, Register SrcReg,
+      bool IsKill, int FrameIndex, const TargetRegisterClass *RC,
+      const TargetRegisterInfo *TRI, Register VReg,
+      MachineInstr::MIFlag Flags) const {
+  DebugLoc DL = MI->getDebugLoc();
+  BuildMI(MBB, MI, DL, get(RISC_VI_VII::SW))
+      .addReg(SrcReg, getKillRegState(IsKill))
+      .addFrameIndex(FrameIndex)
+      .addImm(0);
+}
+
+void RISC_VI_VIIInstrInfo::loadRegFromStackSlot(
+      MachineBasicBlock &MBB, MachineBasicBlock::iterator MI, Register DestReg,
+      int FrameIndex, const TargetRegisterClass *RC,
+      const TargetRegisterInfo *TRI, Register VReg,
+      MachineInstr::MIFlag Flags) const {
+  DebugLoc DL = MI->getDebugLoc();
+  BuildMI(MBB, MI, DL, get(RISC_VI_VII::LW))
+      .addReg(DestReg, RegState::Define)
+      .addFrameIndex(FrameIndex)
+      .addImm(0);
+}
