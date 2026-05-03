@@ -10,6 +10,19 @@ def SDT_RISC_VI_VIIBrCC  : SDTypeProfile<0, 2, [SDTCisVT<0, i32>,
 def risc_vi_vii_brcc     : SDNode<"RISC_VI_VIIISD::BR_CC", SDT_RISC_VI_VIIBrCC,
                             [SDNPHasChain]>;
 
+def SDT_CallSeqStart : SDCallSeqStart<[SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+def SDT_CallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i32>, SDTCisVT<1, i32>]>;
+
+def callseq_start : SDNode<"ISD::CALLSEQ_START", SDT_CallSeqStart,
+                            [SDNPHasChain, SDNPOutGlue]>;
+def callseq_end   : SDNode<"ISD::CALLSEQ_END",   SDT_CallSeqEnd,
+                            [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
+
+def SDT_RISC_VI_VIICall : SDTypeProfile<0, 1, [SDTCisVT<0, i32>]>;
+
+def risc_vi_vii_call : SDNode<"RISC_VI_VIIISD::CALL", SDT_RISC_VI_VIICall,
+                              [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
 //===----------------------------------------------------------------------===//
 // Instruction format superclass
 //===----------------------------------------------------------------------===//
@@ -63,6 +76,11 @@ let isBarrier = 1, isBranch = 1, isTerminator = 1, r1 = 0, r2 = 0 in
 def B : RISC_VI_VIIInst<0xB0, (outs), (ins btarget32:$r3_imm), "B $r3_imm",
                 [(br bb:$r3_imm)]>;
 
+let isCall = 1, hasSideEffects = 1, mayLoad = 1, mayStore = 1, r1 = 0, r2 = 0 in
+def CALL : RISC_VI_VIIInst<0xB1, (outs), (ins btarget32:$func),
+           "CALL $func",
+           []>;
+
 // Conditional branch: branch to target if $r1 != 0
 let isBranch = 1, isTerminator = 1, r2 = 0 in
 def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget32:$r3_imm),
@@ -73,6 +91,17 @@ def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget32:$r3_imm),
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCall = 1, isBranch = 1, isTerminator = 1, r2 = 0, r3_imm = 0 in
 def BR : RISC_VI_VIIInst<0x52, (outs), (ins GPR:$r1), "BR $r1",
                   [(brind GPR:$r1)]>;
+
+// Call-frame adjustment pseudos matched from callseq_start/callseq_end.
+// eliminateCallFramePseudoInstr deletes them; they are pure markers.
+let Defs = [TUNG_TUNG_TUNG_SAHUR], Uses = [TUNG_TUNG_TUNG_SAHUR] in {
+def ADJCALLSTACKDOWN : RISC_VI_VIIPseudoInst<(outs), (ins i32imm:$amt1, i32imm:$amt2),
+    "# ADJCALLSTACKDOWN $amt1, $amt2",
+    [(callseq_start timm:$amt1, timm:$amt2)]>;
+def ADJCALLSTACKUP : RISC_VI_VIIPseudoInst<(outs), (ins i32imm:$amt1, i32imm:$amt2),
+    "# ADJCALLSTACKUP $amt1, $amt2",
+    [(callseq_end timm:$amt1, timm:$amt2)]>;
+}
 
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
 def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
@@ -167,6 +196,11 @@ def SCREEN_FLUSH : RISC_VI_VIIInst<0xFF, (outs), (ins), "SCREEN_FLUSH", [(int_ri
 // putpixel
 def SCREEN_PUT_PIXEL : RISC_VI_VIIInst<0xEE, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
                       "SCREEN_PUT_PIXEL $r1 $r2 $r3_imm", [(int_riscvivii_putpixel GPR:$r1, GPR:$r2, GPR:$r3_imm)]>;
+
+// simrand
+let r3_imm = 0, r2 = 0 in
+def SIM_RAND : RISC_VI_VIIInst<0xE0, (outs GPR:$r1), (ins),
+                      "SIM_RAND $r1", [(set GPR:$r1, (int_riscvivii_simrand))]>;
 
 //===----------------------------------------------------------------------===//
 // Comparison instructions produce 0 or 1 in destination register

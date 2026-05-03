@@ -40,6 +40,13 @@ void RISC_VI_VIIFrameLowering::emitEpilogue(MachineFunction &MF,
       .addImm(FrameSize);
 }
 
+MachineBasicBlock::iterator
+RISC_VI_VIIFrameLowering::eliminateCallFramePseudoInstr(
+    MachineFunction &, MachineBasicBlock &MBB,
+    MachineBasicBlock::iterator MI) const {
+  return MBB.erase(MI);
+}
+
 StackOffset
 RISC_VI_VIIFrameLowering::getFrameIndexReference(const MachineFunction &MF,
                                                   int FI,

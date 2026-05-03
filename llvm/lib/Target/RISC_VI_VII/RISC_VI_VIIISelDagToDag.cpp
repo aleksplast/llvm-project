@@ -172,6 +172,32 @@ void RISC_VI_VIIDAGToDAGISel::Select(SDNode *Node) {
     ReplaceNode(Node, M);
     return;
   }
+  case RISC_VI_VIIISD::CALL: {
+    SDValue Chain = Node->getOperand(0);
+    SDValue Callee = Node->getOperand(1);
+
+    if (auto *GA = dyn_cast<GlobalAddressSDNode>(Callee))
+      Callee = CurDAG->getTargetGlobalAddress(GA->getGlobal(), DL, MVT::i32,
+                                              GA->getOffset());
+    else if (auto *ES = dyn_cast<ExternalSymbolSDNode>(Callee))
+      Callee = CurDAG->getTargetExternalSymbol(ES->getSymbol(), MVT::i32);
+
+    SmallVector<SDValue, 8> Ops;
+    Ops.push_back(Callee);
+    unsigned N = Node->getNumOperands();
+    bool HasGlue = Node->getOperand(N - 1).getValueType() == MVT::Glue;
+    unsigned GlueIdx = HasGlue ? N - 1 : N;
+    for (unsigned i = 2; i < GlueIdx; ++i)
+      Ops.push_back(Node->getOperand(i));
+    Ops.push_back(Chain);
+    if (HasGlue)
+      Ops.push_back(Node->getOperand(GlueIdx));
+
+    SDNode *CallNode = CurDAG->getMachineNode(RISC_VI_VII::CALL, DL,
+                                              Node->getVTList(), Ops);
+    ReplaceNode(Node, CallNode);
+    return;
+  }
   default:
     break;
   }
