@@ -2,8 +2,8 @@
 #define LLVM_LIB_TARGET_RISC_VI_VII_RISC_VI_VIISUBTARGET_H
 
 #include "RISC_VI_VII.h"
+#include "RISC_VI_VIISelectionDAGInfo.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
-#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "RISC_VI_VIIFrameLowering.h"
 #include "RISC_VI_VIIISelLowering.h"
 #include "RISC_VI_VIIInstrInfo.h"
@@ -19,7 +19,7 @@ class RISC_VI_VIISubtarget : public RISC_VI_VIIGenSubtargetInfo {
   RISC_VI_VIIFrameLowering FrameLowering;
   RISC_VI_VIIRegisterInfo RegInfo;
   RISC_VI_VIIInstrInfo InstrInfo;
-  SelectionDAGTargetInfo TSInfo;
+  RISC_VI_VIISelectionDAGInfo TSInfo;
 public:
   RISC_VI_VIISubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
                         const TargetMachine &TM);

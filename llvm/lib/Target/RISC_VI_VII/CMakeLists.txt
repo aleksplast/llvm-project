@@ -23,6 +23,7 @@ add_llvm_target(RISC_VI_VIICodeGen
   RISC_VI_VIIISelDagToDag.cpp
   RISC_VI_VIIISelLowering.cpp
   RISC_VI_VIIMCInstLower.cpp
+  RISC_VI_VIISelectionDAGInfo.cpp
 
   LINK_COMPONENTS
   CodeGen

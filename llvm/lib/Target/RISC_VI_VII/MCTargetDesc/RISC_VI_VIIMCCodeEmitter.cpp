@@ -91,7 +91,8 @@ void RISC_VI_VIIMCCodeEmitter::encodeInstruction(const MCInst &MI,
       Op == RISC_VI_VII::CMP_GT || Op == RISC_VI_VII::CMP_LE ||
       Op == RISC_VI_VII::CMP_GE || Op == RISC_VI_VII::CMP_ULT||
       Op == RISC_VI_VII::CMP_UGT|| Op == RISC_VI_VII::CMP_ULE||
-      Op == RISC_VI_VII::CMP_UGE|| Op == RISC_VI_VII::SCREEN_PUT_PIXEL)
+      Op == RISC_VI_VII::CMP_UGE|| Op == RISC_VI_VII::SCREEN_PUT_PIXEL ||
+      Op == RISC_VI_VII::MEMSET || Op == RISC_VI_VII::MEMCPY)
     R3 = encodeR3Imm(MI, 2, Fixups, STI, false);
   else if (Op == RISC_VI_VII::ADDi  || Op == RISC_VI_VII::SREMi ||
            Op == RISC_VI_VII::ANDi  || Op == RISC_VI_VII::XORi  ||

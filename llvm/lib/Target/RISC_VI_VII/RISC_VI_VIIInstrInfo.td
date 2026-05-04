@@ -190,6 +190,15 @@ def : Pat<(i32 (load GPR:$r2)), (LW GPR:$r2, 0)>;
 def : Pat<(store (i32 GPR:$r1), GPR:$r2), (SW GPR:$r1, GPR:$r2, 0)>;
 
 // flush
+// Hardware memset/memcpy instructions: dst=r1, src_or_val=r2, size=r3_imm.
+let hasSideEffects = 1, mayLoad = 0, mayStore = 1 in
+def MEMSET : RISC_VI_VIIInst<0x12, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
+    "MEMSET $r1 $r2 $r3_imm", []>;
+
+let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
+def MEMCPY : RISC_VI_VIIInst<0x13, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
+    "MEMCPY $r1 $r2 $r3_imm", []>;
+
 let r1 = 0, r2 = 0, r3_imm = 0 in
 def SCREEN_FLUSH : RISC_VI_VIIInst<0xFF, (outs), (ins), "SCREEN_FLUSH", [(int_riscvivii_flush)]>;
 

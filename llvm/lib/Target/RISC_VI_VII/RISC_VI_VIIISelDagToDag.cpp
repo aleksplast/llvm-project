@@ -172,6 +172,30 @@ void RISC_VI_VIIDAGToDAGISel::Select(SDNode *Node) {
     ReplaceNode(Node, M);
     return;
   }
+  case RISC_VI_VIIISD::MEMSET: {
+    SDValue Chain = Node->getOperand(0);
+    SDValue Dst   = Node->getOperand(1);
+    SDValue Val   = Node->getOperand(2);
+    SDValue Size  = Node->getOperand(3);
+    SDNode *Res = CurDAG->getMachineNode(RISC_VI_VII::MEMSET, DL, MVT::Other,
+                                         {Dst, Val, Size, Chain});
+    ReplaceUses(SDValue(Node, 0), SDValue(Res, 0));
+    CurDAG->RemoveDeadNode(Node);
+    return;
+  }
+
+  case RISC_VI_VIIISD::MEMCPY: {
+    SDValue Chain = Node->getOperand(0);
+    SDValue Dst   = Node->getOperand(1);
+    SDValue Src   = Node->getOperand(2);
+    SDValue Size  = Node->getOperand(3);
+    SDNode *Res = CurDAG->getMachineNode(RISC_VI_VII::MEMCPY, DL, MVT::Other,
+                                         {Dst, Src, Size, Chain});
+    ReplaceUses(SDValue(Node, 0), SDValue(Res, 0));
+    CurDAG->RemoveDeadNode(Node);
+    return;
+  }
+
   case RISC_VI_VIIISD::CALL: {
     SDValue Chain = Node->getOperand(0);
     SDValue Callee = Node->getOperand(1);

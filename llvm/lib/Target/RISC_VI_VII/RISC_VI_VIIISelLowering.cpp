@@ -89,6 +89,10 @@ const char *RISC_VI_VIITargetLowering::getTargetNodeName(unsigned Opcode) const 
     return "RISC_VI_VIIISD::BR_CC";
   case RISC_VI_VIIISD::INC_EQ:
     return "RISC_VI_VIIISD::INC_EQ";
+  case RISC_VI_VIIISD::MEMSET:
+    return "RISC_VI_VIIISD::MEMSET";
+  case RISC_VI_VIIISD::MEMCPY:
+    return "RISC_VI_VIIISD::MEMCPY";
   }
   return nullptr;
 }
