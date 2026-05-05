@@ -1,4 +1,5 @@
 #include "MCTargetDesc/RISC_VI_VIIMCTargetDesc.h"
+#include "MCTargetDesc/RISC_VI_VIIFixupKinds.h"
 #include "RISC_VI_VII.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/MC/MCELFObjectWriter.h"
@@ -34,7 +35,12 @@ unsigned RISC_VI_VIIELFObjectWriter::getRelocType(MCContext &Ctx, const MCValue 
   if (Kind >= FirstLiteralRelocationKind)
     return Kind - FirstLiteralRelocationKind;
 
-  llvm_unreachable("Unimplemented fixup -> relocation");
+  switch (unsigned(Kind)) {
+  case RISC_VI_VII::fixup_RISC_VI_VII_PC32:
+    return 1;
+  default:
+    llvm_unreachable("Unimplemented fixup -> relocation");
+  }
 }
 
 bool RISC_VI_VIIELFObjectWriter::needsRelocateWithSymbol(const MCValue &,

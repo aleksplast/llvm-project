@@ -1,5 +1,6 @@
 #include "MCTargetDesc/RISC_VI_VIIMCTargetDesc.h"
 #include "RISC_VI_VII.h"
+#include "MCTargetDesc/RISC_VI_VIIFixupKinds.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -43,6 +44,7 @@ public:
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const override;
 
+  // binary encoding for an instruction.
   uint64_t getBinaryCodeForInstr(const MCInst &MI,
                                  SmallVectorImpl<MCFixup> &Fixups,
                                  const MCSubtargetInfo &STI) const;
@@ -50,66 +52,21 @@ public:
   unsigned getMachineOpValue(const MCInst &MI, const MCOperand &MO,
                              SmallVectorImpl<MCFixup> &Fixups,
                              const MCSubtargetInfo &STI) const;
-
-  uint64_t encodeR3Imm(const MCInst &MI, unsigned OpIdx,
-                       SmallVectorImpl<MCFixup> &Fixups,
-                       const MCSubtargetInfo &STI, bool IsSymbol) const;
+  unsigned getSImm32OpValue(const MCInst &MI, unsigned OpNo,
+                            SmallVectorImpl<MCFixup> &Fixups,
+                            const MCSubtargetInfo &STI) const;
+  uint64_t getBranchTarget32OpValue(const MCInst &MI, unsigned OpNo,
+                                    SmallVectorImpl<MCFixup> &Fixups,
+                                    const MCSubtargetInfo &STI) const;
 };
 
 } // end anonymous namespace
-
-uint64_t RISC_VI_VIIMCCodeEmitter::encodeR3Imm(const MCInst &MI, unsigned OpIdx,
-    SmallVectorImpl<MCFixup> &Fixups,
-    const MCSubtargetInfo &STI, bool IsSymbol) const {
-  const MCOperand &MO = MI.getOperand(OpIdx);
-  if (MO.isReg())
-    return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg()) & 0xFFFFFFFFULL;
-  if (MO.isImm())
-    return static_cast<uint64_t>(MO.getImm()) & 0xFFFFFFFFULL;
-  if (MO.isExpr()) {
-    Fixups.push_back(MCFixup::create(
-        0, MO.getExpr(),
-        MCFixupKind(FirstLiteralRelocationKind + 1), MI.getLoc()));
-    return 0;
-  }
-  llvm_unreachable("Unexpected operand type for r3_imm");
-}
 
 void RISC_VI_VIIMCCodeEmitter::encodeInstruction(const MCInst &MI,
                                          SmallVectorImpl<char> &CB,
                                          SmallVectorImpl<MCFixup> &Fixups,
                                          const MCSubtargetInfo &STI) const {
   uint64_t Bits = getBinaryCodeForInstr(MI, Fixups, STI);
-
-  unsigned Op = MI.getOpcode();
-  uint64_t R3 = 0;
-
-  if (Op == RISC_VI_VII::ADD    || Op == RISC_VI_VII::MUL    ||
-      Op == RISC_VI_VII::SHL    || Op == RISC_VI_VII::OR     ||
-      Op == RISC_VI_VII::AND    || Op == RISC_VI_VII::CMP_EQ ||
-      Op == RISC_VI_VII::CMP_NE || Op == RISC_VI_VII::CMP_LT ||
-      Op == RISC_VI_VII::CMP_GT || Op == RISC_VI_VII::CMP_LE ||
-      Op == RISC_VI_VII::CMP_GE || Op == RISC_VI_VII::CMP_ULT||
-      Op == RISC_VI_VII::CMP_UGT|| Op == RISC_VI_VII::CMP_ULE||
-      Op == RISC_VI_VII::CMP_UGE|| Op == RISC_VI_VII::SCREEN_PUT_PIXEL ||
-      Op == RISC_VI_VII::MEMSET || Op == RISC_VI_VII::MEMCPY)
-    R3 = encodeR3Imm(MI, 2, Fixups, STI, false);
-  else if (Op == RISC_VI_VII::ADDi  || Op == RISC_VI_VII::SREMi ||
-           Op == RISC_VI_VII::ANDi  || Op == RISC_VI_VII::XORi  ||
-           Op == RISC_VI_VII::LW    || Op == RISC_VI_VII::SW)
-    R3 = encodeR3Imm(MI, 2, Fixups, STI, true);
-  else if (Op == RISC_VI_VII::MOVI)
-    R3 = encodeR3Imm(MI, 1, Fixups, STI, true);
-  else if (Op == RISC_VI_VII::INC_EQ)
-    R3 = encodeR3Imm(MI, 3, Fixups, STI, true);
-  else if (Op == RISC_VI_VII::B)
-    R3 = encodeR3Imm(MI, 0, Fixups, STI, true);
-  else if (Op == RISC_VI_VII::CALL)
-    R3 = encodeR3Imm(MI, 0, Fixups, STI, true);
-  else if (Op == RISC_VI_VII::BR_COND)
-    R3 = encodeR3Imm(MI, 1, Fixups, STI, true);
-  Bits |= R3;
-
   support::endian::write(CB, Bits, llvm::endianness::little);
   ++MCNumEmitted;
 }
@@ -135,6 +92,40 @@ unsigned RISC_VI_VIIMCCodeEmitter::getMachineOpValue(const MCInst &MI,
   return 0;
 }
 
+unsigned RISC_VI_VIIMCCodeEmitter::getSImm32OpValue(const MCInst &MI, unsigned OpNo,
+                                            SmallVectorImpl<MCFixup> &Fixups,
+                                            const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+  if (MO.isImm())
+    return MO.getImm();
+
+  assert(MO.isExpr() &&
+         "getSImm32OpValue expects only expressions or an immediate");
+
+  const MCExpr *Expr = MO.getExpr();
+
+  if (const MCConstantExpr *CE = dyn_cast<MCConstantExpr>(Expr))
+    return CE->getValue();
+
+  return 0;
+}
+
+uint64_t
+RISC_VI_VIIMCCodeEmitter::getBranchTarget32OpValue(const MCInst &MI, unsigned OpNo,
+                                           SmallVectorImpl<MCFixup> &Fixups,
+                                           const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+
+  if (MO.isImm())
+    return MO.getImm() / 4;
+
+  assert(MO.isExpr() &&
+         "getBranchTarget32OpValue expects only expressions or immediates");
+
+  Fixups.push_back(
+      MCFixup::create(0, MO.getExpr(), MCFixupKind(RISC_VI_VII::fixup_RISC_VI_VII_PC32)));
+  return 0;
+}
 
 #include "RISC_VI_VIIGenMCCodeEmitter.inc"
 

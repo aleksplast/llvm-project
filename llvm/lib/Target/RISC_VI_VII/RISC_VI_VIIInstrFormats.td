@@ -3,7 +3,7 @@
 //
 //  CPU INSTRUCTION FORMATS (64-bit)
 //
-//  [63:56] opcode  [55:52] r1  [51:48] r2  [47:32] padding  [31:0] r3_imm
+//  [63:56] opcode  [55:52] r1  [51:48] r2  [47:32] padding  [31:0] r3/imm
 //
 //===----------------------------------------------------------------------===//
 
@@ -27,12 +27,33 @@ class RISC_VI_VIIInst<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pa
   let Inst{55-52} = r1;
   let Inst{51-48} = r2;
   let Inst{47-32} = 0;
-  let Inst{31-0}  = r3_imm;
+  let Inst{31-0}  = 0;  // Subclasses override this for their operand types
 
   let OutOperandList = outs;
   let InOperandList  = ins;
   let AsmString   = asmstr;
   let Pattern     = pattern;
+}
+
+// R-type: third operand is a register (4-bit encoding in bits 3:0)
+class RISC_VI_VIIInstR<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
+    : RISC_VI_VIIInst<op, outs, ins, asmstr, pattern> {
+  bits<4> r3_reg;
+  let Inst{3-0} = r3_reg;
+}
+
+// I-type: third operand is a 32-bit signed immediate
+class RISC_VI_VIIInstI<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
+    : RISC_VI_VIIInst<op, outs, ins, asmstr, pattern> {
+  bits<32> imm32;
+  let Inst{31-0} = imm32;
+}
+
+// B-type: third operand is a 32-bit branch/call target
+class RISC_VI_VIIInstB<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
+    : RISC_VI_VIIInst<op, outs, ins, asmstr, pattern> {
+  bits<32> btarget;
+  let Inst{31-0} = btarget;
 }
 
 // Pseudo instructions format

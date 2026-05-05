@@ -73,19 +73,19 @@ def simm32 : Operand<i32>, ImmLeaf<i32, [{ return true; }]> {
 
 // Unconditional direct branch
 let isBarrier = 1, isBranch = 1, isTerminator = 1, r1 = 0, r2 = 0 in
-def B : RISC_VI_VIIInst<0xB0, (outs), (ins btarget32:$r3_imm), "B $r3_imm",
-                [(br bb:$r3_imm)]>;
+def B : RISC_VI_VIIInstB<0xB0, (outs), (ins btarget32:$btarget), "B $btarget",
+                [(br bb:$btarget)]>;
 
 let isCall = 1, hasSideEffects = 1, mayLoad = 1, mayStore = 1, r1 = 0, r2 = 0 in
-def CALL : RISC_VI_VIIInst<0xB1, (outs), (ins btarget32:$func),
-           "CALL $func",
+def CALL : RISC_VI_VIIInstB<0xB1, (outs), (ins btarget32:$btarget),
+           "CALL $btarget",
            []>;
 
 // Conditional branch: branch to target if $r1 != 0
 let isBranch = 1, isTerminator = 1, r2 = 0 in
-def BR_COND : RISC_VI_VIIInst<0x21, (outs), (ins GPR:$r1, btarget32:$r3_imm),
-                      "BR_COND $r1 $r3_imm",
-                      [(risc_vi_vii_brcc GPR:$r1, bb:$r3_imm)]>;
+def BR_COND : RISC_VI_VIIInstB<0x21, (outs), (ins GPR:$r1, btarget32:$btarget),
+                      "BR_COND $r1 $btarget",
+                      [(risc_vi_vii_brcc GPR:$r1, bb:$btarget)]>;
 
 // Indirect branch (to register)
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCall = 1, isBranch = 1, isTerminator = 1, r2 = 0, r3_imm = 0 in
@@ -110,27 +110,27 @@ def PseudoRET : RISC_VI_VIIPseudoInst<(outs), (ins), "# PseudoRET",
 
 // addi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def ADDi : RISC_VI_VIIInst<0x40, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
-           "ADDi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (add GPR:$r2, simm32:$r3_imm))]>;
+def ADDi : RISC_VI_VIIInstI<0x40, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm32),
+           "ADDi $r1 $r2 $imm32",
+           [(set GPR:$r1, (add GPR:$r2, simm32:$imm32))]>;
 
 // sremi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def SREMi : RISC_VI_VIIInst<0x50, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
-           "SREMi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (srem GPR:$r2, simm32:$r3_imm))]>;
+def SREMi : RISC_VI_VIIInstI<0x50, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm32),
+           "SREMi $r1 $r2 $imm32",
+           [(set GPR:$r1, (srem GPR:$r2, simm32:$imm32))]>;
 
 // andi
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def ANDi : RISC_VI_VIIInst<0x60, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
-           "ANDi $r1 $r2 $r3_imm",
-           [(set GPR:$r1, (and GPR:$r2, simm32:$r3_imm))]>;
+def ANDi : RISC_VI_VIIInstI<0x60, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm32),
+           "ANDi $r1 $r2 $imm32",
+           [(set GPR:$r1, (and GPR:$r2, simm32:$imm32))]>;
 
 // movi
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r2 = 0 in
-def MOVI : RISC_VI_VIIInst<0x67, (outs GPR:$r1), (ins simm32:$r3_imm),
-                     "MOVi $r1 $r3_imm",
-                     [(set GPR:$r1, simm32:$r3_imm)]>;
+def MOVI : RISC_VI_VIIInstI<0x67, (outs GPR:$r1), (ins simm32:$imm32),
+                     "MOVi $r1 $imm32",
+                     [(set GPR:$r1, simm32:$imm32)]>;
 
 // mov
 let isAsCheapAsAMove = 1, isCodeGenOnly = 1, isReMaterializable = 1, r3_imm = 0 in
@@ -139,37 +139,37 @@ def MOV : RISC_VI_VIIInst<0x66, (outs GPR:$r1), (ins GPR:$r2),
           []>;
 
 let Constraints = "$r2 = $rs_out", hasSideEffects = 1, mayLoad = 0, mayStore = 0 in
-def INC_EQ : RISC_VI_VIIInst<0x90, (outs GPR:$r1, GPR:$rs_out), (ins GPR:$r2, simm32:$r3_imm), "INC_EQ $r1 $r2 $r3_imm", []>;
+def INC_EQ : RISC_VI_VIIInstI<0x90, (outs GPR:$r1, GPR:$rs_out), (ins GPR:$r2, simm32:$imm32), "INC_EQ $r1 $r2 $imm32", []>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def ADD : RISC_VI_VIIInst<0x41, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-    "ADD $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (add GPR:$r2, GPR:$r3_imm))]>;
+def ADD : RISC_VI_VIIInstR<0x41, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+    "ADD $r1 $r2 $r3_reg",
+    [(set GPR:$r1, (add GPR:$r2, GPR:$r3_reg))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def MUL : RISC_VI_VIIInst<0x42, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-    "MUL $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (mul GPR:$r2, GPR:$r3_imm))]>;
+def MUL : RISC_VI_VIIInstR<0x42, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+    "MUL $r1 $r2 $r3_reg",
+    [(set GPR:$r1, (mul GPR:$r2, GPR:$r3_reg))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def SHL : RISC_VI_VIIInst<0x43, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-    "SHL $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (shl GPR:$r2, GPR:$r3_imm))]>;
+def SHL : RISC_VI_VIIInstR<0x43, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+    "SHL $r1 $r2 $r3_reg",
+    [(set GPR:$r1, (shl GPR:$r2, GPR:$r3_reg))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def OR : RISC_VI_VIIInst<0x44, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-    "OR $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (or GPR:$r2, GPR:$r3_imm))]>;
+def OR : RISC_VI_VIIInstR<0x44, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+    "OR $r1 $r2 $r3_reg",
+    [(set GPR:$r1, (or GPR:$r2, GPR:$r3_reg))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def AND : RISC_VI_VIIInst<0x45, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-    "AND $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (and GPR:$r2, GPR:$r3_imm))]>;
+def AND : RISC_VI_VIIInstR<0x45, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+    "AND $r1 $r2 $r3_reg",
+    [(set GPR:$r1, (and GPR:$r2, GPR:$r3_reg))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-def XORi : RISC_VI_VIIInst<0x46, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
-    "XORi $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (xor GPR:$r2, simm32:$r3_imm))]>;
+def XORi : RISC_VI_VIIInstI<0x46, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm32),
+    "XORi $r1 $r2 $imm32",
+    [(set GPR:$r1, (xor GPR:$r2, simm32:$imm32))]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 def SELECT : RISC_VI_VIIInst<0x47, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm1, simm32:$imm2, simm32:$imm3),
@@ -177,34 +177,34 @@ def SELECT : RISC_VI_VIIInst<0x47, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm1, s
     [(set GPR:$r1, (selectcc GPR:$r2, simm32:$imm1, simm32:$imm2, simm32:$imm3, SETEQ))]>;
 
 let mayLoad = 1, hasSideEffects = 0 in
-def LW : RISC_VI_VIIInst<0x10, (outs GPR:$r1), (ins GPR:$r2, simm32:$r3_imm),
-    "LW $r1 $r2 $r3_imm",
-    [(set GPR:$r1, (load (add GPR:$r2, simm32:$r3_imm)))]>;
+def LW : RISC_VI_VIIInstI<0x10, (outs GPR:$r1), (ins GPR:$r2, simm32:$imm32),
+    "LW $r1 $r2 $imm32",
+    [(set GPR:$r1, (load (add GPR:$r2, simm32:$imm32)))]>;
 
 let mayStore = 1, hasSideEffects = 0 in
-def SW : RISC_VI_VIIInst<0x11, (outs), (ins GPR:$r1, GPR:$r2, simm32:$r3_imm),
-    "SW $r1 $r2 $r3_imm",
-    [(store (i32 GPR:$r1), (add GPR:$r2, simm32:$r3_imm))]>;
+def SW : RISC_VI_VIIInstI<0x11, (outs), (ins GPR:$r1, GPR:$r2, simm32:$imm32),
+    "SW $r1 $r2 $imm32",
+    [(store (i32 GPR:$r1), (add GPR:$r2, simm32:$imm32))]>;
 
 def : Pat<(i32 (load GPR:$r2)), (LW GPR:$r2, 0)>;
 def : Pat<(store (i32 GPR:$r1), GPR:$r2), (SW GPR:$r1, GPR:$r2, 0)>;
 
 // flush
-// Hardware memset/memcpy instructions: dst=r1, src_or_val=r2, size=r3_imm.
+// Hardware memset/memcpy instructions: dst=r1, src_or_val=r2, size=r3_reg.
 let hasSideEffects = 1, mayLoad = 0, mayStore = 1 in
-def MEMSET : RISC_VI_VIIInst<0x12, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
-    "MEMSET $r1 $r2 $r3_imm", []>;
+def MEMSET : RISC_VI_VIIInstR<0x12, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_reg),
+    "MEMSET $r1 $r2 $r3_reg", []>;
 
 let hasSideEffects = 1, mayLoad = 1, mayStore = 1 in
-def MEMCPY : RISC_VI_VIIInst<0x13, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
-    "MEMCPY $r1 $r2 $r3_imm", []>;
+def MEMCPY : RISC_VI_VIIInstR<0x13, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_reg),
+    "MEMCPY $r1 $r2 $r3_reg", []>;
 
 let r1 = 0, r2 = 0, r3_imm = 0 in
 def SCREEN_FLUSH : RISC_VI_VIIInst<0xFF, (outs), (ins), "SCREEN_FLUSH", [(int_riscvivii_flush)]>;
 
 // putpixel
-def SCREEN_PUT_PIXEL : RISC_VI_VIIInst<0xEE, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
-                      "SCREEN_PUT_PIXEL $r1 $r2 $r3_imm", [(int_riscvivii_putpixel GPR:$r1, GPR:$r2, GPR:$r3_imm)]>;
+def SCREEN_PUT_PIXEL : RISC_VI_VIIInstR<0xEE, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_reg),
+                      "SCREEN_PUT_PIXEL $r1 $r2 $r3_reg", [(int_riscvivii_putpixel GPR:$r1, GPR:$r2, GPR:$r3_reg)]>;
 
 // simrand
 let r3_imm = 0, r2 = 0 in
@@ -218,37 +218,37 @@ def SIM_RAND : RISC_VI_VIIInst<0xE0, (outs GPR:$r1), (ins),
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 
 // Signed comparisons (reg-reg)
-def CMP_EQ  : RISC_VI_VIIInst<0x30, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_EQ $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (seteq  GPR:$r2, GPR:$r3_imm))]>;
-def CMP_NE  : RISC_VI_VIIInst<0x31, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_NE $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setne  GPR:$r2, GPR:$r3_imm))]>;
-def CMP_LT  : RISC_VI_VIIInst<0x32, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_LT $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setlt  GPR:$r2, GPR:$r3_imm))]>;
-def CMP_GT  : RISC_VI_VIIInst<0x33, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_GT $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setgt  GPR:$r2, GPR:$r3_imm))]>;
-def CMP_LE  : RISC_VI_VIIInst<0x34, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_LE $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setle  GPR:$r2, GPR:$r3_imm))]>;
-def CMP_GE  : RISC_VI_VIIInst<0x35, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_GE $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setge  GPR:$r2, GPR:$r3_imm))]>;
+def CMP_EQ  : RISC_VI_VIIInstR<0x30, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_EQ $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (seteq  GPR:$r2, GPR:$r3_reg))]>;
+def CMP_NE  : RISC_VI_VIIInstR<0x31, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_NE $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setne  GPR:$r2, GPR:$r3_reg))]>;
+def CMP_LT  : RISC_VI_VIIInstR<0x32, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_LT $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setlt  GPR:$r2, GPR:$r3_reg))]>;
+def CMP_GT  : RISC_VI_VIIInstR<0x33, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_GT $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setgt  GPR:$r2, GPR:$r3_reg))]>;
+def CMP_LE  : RISC_VI_VIIInstR<0x34, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_LE $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setle  GPR:$r2, GPR:$r3_reg))]>;
+def CMP_GE  : RISC_VI_VIIInstR<0x35, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_GE $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setge  GPR:$r2, GPR:$r3_reg))]>;
 
 // Unsigned comparisons (reg-reg)
-def CMP_ULT : RISC_VI_VIIInst<0x36, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_ULT $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setult GPR:$r2, GPR:$r3_imm))]>;
-def CMP_UGT : RISC_VI_VIIInst<0x37, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_UGT $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setugt GPR:$r2, GPR:$r3_imm))]>;
-def CMP_ULE : RISC_VI_VIIInst<0x38, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_ULE $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setule GPR:$r2, GPR:$r3_imm))]>;
-def CMP_UGE : RISC_VI_VIIInst<0x39, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_imm),
-                "CMP_UGE $r1 $r2 $r3_imm",
-                [(set GPR:$r1, (setuge GPR:$r2, GPR:$r3_imm))]>;
+def CMP_ULT : RISC_VI_VIIInstR<0x36, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_ULT $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setult GPR:$r2, GPR:$r3_reg))]>;
+def CMP_UGT : RISC_VI_VIIInstR<0x37, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_UGT $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setugt GPR:$r2, GPR:$r3_reg))]>;
+def CMP_ULE : RISC_VI_VIIInstR<0x38, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_ULE $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setule GPR:$r2, GPR:$r3_reg))]>;
+def CMP_UGE : RISC_VI_VIIInstR<0x39, (outs GPR:$r1), (ins GPR:$r2, GPR:$r3_reg),
+                "CMP_UGE $r1 $r2 $r3_reg",
+                [(set GPR:$r1, (setuge GPR:$r2, GPR:$r3_reg))]>;
 
 } // hasSideEffects = 0

@@ -1,5 +1,6 @@
 #include "MCTargetDesc/RISC_VI_VIIMCTargetDesc.h"
 #include "llvm/ADT/StringSwitch.h"
+#include "MCTargetDesc/RISC_VI_VIIFixupKinds.h"
 #include "llvm/MC/MCAsmBackend.h"
 #include "llvm/MC/MCELFObjectWriter.h"
 #include "llvm/MC/MCExpr.h"
@@ -21,12 +22,22 @@ public:
   RISC_VI_VIIAsmBackend(const Target &T)
       : MCAsmBackend(llvm::endianness::little), TheTarget(T) {}
 
-  unsigned getNumFixupKinds() const override { return 0; }
+  unsigned getNumFixupKinds() const override { return RISC_VI_VII::NumTargetFixupKinds; }
 
   const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override {
+    const static MCFixupKindInfo InfosLE[RISC_VI_VII::NumTargetFixupKinds] = {
+        {"fixup_RISC_VI_VII_PC32", 0, 32, MCFixupKindInfo::FKF_IsPCRel},
+    };
+
     if (Kind >= FirstLiteralRelocationKind)
       return MCAsmBackend::getFixupKindInfo(FK_NONE);
-    return MCAsmBackend::getFixupKindInfo(Kind);
+
+    if (Kind < FirstTargetFixupKind)
+      return MCAsmBackend::getFixupKindInfo(Kind);
+
+    assert(unsigned(Kind - FirstTargetFixupKind) < getNumFixupKinds() &&
+           "Invalid kind!");
+    return InfosLE[Kind - FirstTargetFixupKind];
   }
 
   bool writeNopData(raw_ostream &OS, uint64_t Count,
@@ -54,13 +65,20 @@ public:
                   const MCValue &Target, MutableArrayRef<char> Data,
                   uint64_t Value, bool IsResolved,
                   const MCSubtargetInfo *STI) const override {
-    if (!IsResolved)
+    unsigned NumBytes = 0;
+    switch (Fixup.getKind()) {
+    default:
       return;
+    case RISC_VI_VII::fixup_RISC_VI_VII_PC32:
+      Value /= 4;
+      NumBytes = 4;
+      break;
+    }
+
     unsigned Offset = Fixup.getOffset();
-    Data[Offset + 0] = (Value >> 0) & 0xFF;
-    Data[Offset + 1] = (Value >> 8) & 0xFF;
-    Data[Offset + 2] = (Value >> 16) & 0xFF;
-    Data[Offset + 3] = (Value >> 24) & 0xFF;
+    for (unsigned i = 0; i != NumBytes; ++i) {
+      Data[Offset + i] |= uint8_t((Value >> (i * 8)) & 0xff);
+    }
   }
 
   std::unique_ptr<MCObjectTargetWriter>
