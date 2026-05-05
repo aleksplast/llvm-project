@@ -38,8 +38,8 @@ class RISC_VI_VIIInst<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pa
 // R-type: third operand is a register (4-bit encoding in bits 3:0)
 class RISC_VI_VIIInstR<bits<8> op, dag outs, dag ins, string asmstr, list<dag> pattern>
     : RISC_VI_VIIInst<op, outs, ins, asmstr, pattern> {
-  bits<4> r3_reg;
-  let Inst{3-0} = r3_reg;
+  bits<4> r3;
+  let Inst{3-0} = r3;
 }
 
 // I-type: third operand is a 32-bit signed immediate
