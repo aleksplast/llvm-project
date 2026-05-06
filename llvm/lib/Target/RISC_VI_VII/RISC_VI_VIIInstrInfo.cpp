@@ -57,3 +57,80 @@ void RISC_VI_VIIInstrInfo::loadRegFromStackSlot(
       .addFrameIndex(FrameIndex)
       .addImm(0);
 }
+
+bool RISC_VI_VIIInstrInfo::analyzeBranch(MachineBasicBlock &MBB,
+                                          MachineBasicBlock *&TBB,
+                                          MachineBasicBlock *&FBB,
+                                          SmallVectorImpl<MachineOperand> &Cond,
+                                          bool AllowModify) const {
+  TBB = FBB = nullptr;
+  Cond.clear();
+
+  MachineBasicBlock::iterator I = MBB.end();
+  while (I != MBB.begin()) {
+    --I;
+    if (I->isDebugInstr())
+      continue;
+    if (!I->isTerminator())
+      break;
+
+    unsigned Opc = I->getOpcode();
+    if (Opc == RISC_VI_VII::B) {
+      TBB = I->getOperand(0).getMBB();
+    } else if (Opc == RISC_VI_VII::BR_COND) {
+      FBB = TBB;
+      TBB = I->getOperand(1).getMBB();
+      Cond.push_back(I->getOperand(0));
+    } else {
+      return true; // unknown terminator
+    }
+  }
+  return false;
+}
+
+unsigned RISC_VI_VIIInstrInfo::insertBranch(MachineBasicBlock &MBB,
+                                             MachineBasicBlock *TBB,
+                                             MachineBasicBlock *FBB,
+                                             ArrayRef<MachineOperand> Cond,
+                                             const DebugLoc &DL,
+                                             int *BytesAdded) const {
+  assert(TBB && "insertBranch must not be told to insert a fallthrough");
+  assert(Cond.size() <= 1);
+
+  if (Cond.empty()) {
+    BuildMI(&MBB, DL, get(RISC_VI_VII::B)).addMBB(TBB);
+    if (BytesAdded) *BytesAdded = 8;
+    return 1;
+  }
+
+  BuildMI(&MBB, DL, get(RISC_VI_VII::BR_COND)).add(Cond[0]).addMBB(TBB);
+  if (!FBB) {
+    if (BytesAdded) *BytesAdded = 8;
+    return 1;
+  }
+
+  BuildMI(&MBB, DL, get(RISC_VI_VII::B)).addMBB(FBB);
+  if (BytesAdded) *BytesAdded = 16;
+  return 2;
+}
+
+unsigned RISC_VI_VIIInstrInfo::removeBranch(MachineBasicBlock &MBB,
+                                             int *BytesRemoved) const {
+  MachineBasicBlock::iterator I = MBB.end();
+  unsigned Count = 0;
+
+  while (I != MBB.begin()) {
+    --I;
+    if (I->isDebugInstr())
+      continue;
+    unsigned Opc = I->getOpcode();
+    if (Opc != RISC_VI_VII::B && Opc != RISC_VI_VII::BR_COND)
+      break;
+    I->eraseFromParent();
+    I = MBB.end();
+    ++Count;
+  }
+
+  if (BytesRemoved) *BytesRemoved = Count * 8;
+  return Count;
+}

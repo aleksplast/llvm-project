@@ -305,7 +305,6 @@ SDValue RISC_VI_VIITargetLowering::LowerCall(TargetLowering::CallLoweringInfo &C
   if (GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee)) {
     // llvm_unreachable("How do i suppose to lower this?");
     const GlobalValue *GV = S->getGlobal();
-    assert(getTargetMachine().shouldAssumeDSOLocal(GV));
     Callee = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0, 0);
   }
 
